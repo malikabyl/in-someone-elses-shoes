@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>In Someone Else's Shoes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;700&display=swap">
+<style>
+/* One passbook column: ledger paper, dotted leader rows, a teletype tape for the news. */
+:root {
+  --paper: #E9EFE4;
+  --card: #F6F9F2;
+  --ink: #15231B;
+  --muted: #586A5E;
+  --line: #C6D2C3;
+  --accent: #1D6846;
+  --on-accent: #F6F9F2;
+  --pos: #1D6846;
+  --neg: #AE3A2B;
+  --gold: #8F6511;
+  --tape: #DCE5D6;
+  --font-display: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-data: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1512; --card: #151E19; --ink: #DCE6DD; --muted: #8FA396; --line: #27352D;
+    --accent: #5FC08F; --on-accent: #0B1510; --pos: #5FC08F; --neg: #F0806E; --gold: #DDAF55; --tape: #1B2620;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1512; --card: #151E19; --ink: #DCE6DD; --muted: #8FA396; --line: #27352D;
+  --accent: #5FC08F; --on-accent: #0B1510; --pos: #5FC08F; --neg: #F0806E; --gold: #DDAF55; --tape: #1B2620;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+#app { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 120px; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3, p { margin: 0; }
+button { font: inherit; color: inherit; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.pos { color: var(--pos); } .neg { color: var(--neg); } .muted { color: var(--muted); }
+.eyebrow { font-family: var(--font-data); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- header ---------- */
+.top { display: flex; flex-direction: column; gap: 10px; }
+.top-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -.01em; }
+.when { font-family: var(--font-data); font-size: 13px; }
+.who { color: var(--muted); font-size: 13px; }
+.years { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; }
+.year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; height: 8px; }
+.tick { background: var(--line); }
+.tick.done { background: var(--ink); }
+.tick.now { background: var(--accent); }
+
+/* ---------- teletype ---------- */
+.wire { background: var(--tape); border-left: 3px solid var(--ink); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.wire-head { font-family: var(--font-display); font-size: 18px; line-height: 1.3; font-weight: 500; text-wrap: pretty; }
+.moves { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--font-data); font-size: 12.5px; }
+.notes { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.note::before { content: '— '; color: var(--muted); }
+
+/* ---------- freedom gauge ---------- */
+.free { display: flex; flex-direction: column; gap: 8px; }
+.free-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.free-pct { font-family: var(--font-data); font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -.02em; }
+.free-cap { font-size: 13px; color: var(--muted); text-align: right; min-width: 0; }
+.bar { height: 14px; background: var(--card); border: 1px solid var(--ink); position: relative; }
+.bar > i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.bar > i.neg-fill { background: var(--neg); }
+.streak { font-size: 13px; }
+
+/* ---------- ledger rows ---------- */
+.block { display: flex; flex-direction: column; gap: 8px; }
+.block > h2 { font-family: var(--font-data); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--ink); }
+.rows { display: flex; flex-direction: column; gap: 5px; }
+.row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.row > span:first-child { min-width: 0; }
+.row > .dots { flex: 1 1 12px; border-bottom: 1px dotted var(--muted); transform: translateY(-4px); min-width: 12px; opacity: .6; }
+.row > .num { white-space: nowrap; }
+.row.sum { padding-top: 6px; border-top: 1px solid var(--line); font-weight: 600; }
+.tag { font-family: var(--font-data); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 0 4px; margin-left: 6px; white-space: nowrap; }
+
+.eco { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.eco div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.eco b { font-family: var(--font-data); font-weight: 600; font-size: 17px; }
+.eco span { font-size: 11.5px; color: var(--muted); line-height: 1.2; }
+@media (max-width: 380px) { .eco { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- assets ---------- */
+.asset { background: var(--card); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.asset-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.asset-head > div { min-width: 0; }
+.asset-name { font-weight: 600; font-size: 16px; }
+.asset-price { font-family: var(--font-data); font-size: 13px; color: var(--muted); }
+.asset-price b { color: var(--ink); font-weight: 600; }
+.spark { flex: 0 0 96px; width: 96px; height: 32px; }
+.spark path.l { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.spark path.a { fill: var(--ink); opacity: .08; stroke: none; }
+.spark circle { fill: var(--accent); }
+.own { font-size: 14px; }
+.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.acts > span { font-size: 12px; color: var(--muted); flex: 0 0 62px; }
+.chip { font-family: var(--font-data); font-size: 13px; background: var(--paper); border: 1px solid var(--ink); padding: 7px 10px; min-height: 36px; cursor: pointer; white-space: nowrap; }
+.chip:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.chip:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
+.btn { font-weight: 600; background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); padding: 10px 14px; min-height: 42px; cursor: pointer; }
+.btn:disabled { background: transparent; color: var(--muted); border-color: var(--line); cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--ink); font-weight: 500; }
+.why { font-size: 13px; color: var(--neg); }
+.hint { font-size: 13px; color: var(--muted); }
+.house { border-top: 1px dotted var(--muted); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.locked { font-size: 14px; color: var(--muted); }
+
+/* ---------- bottom dock ---------- */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--paper); border-top: 1px solid var(--ink); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5; }
+.dock-in { max-width: 528px; margin: 0 auto; display: flex; gap: 8px; }
+.dock .btn { flex: 1 1 auto; font-size: 16px; min-height: 48px; }
+.dock .btn.ghost { flex: 0 0 auto; font-size: 14px; }
+
+/* ---------- start ---------- */
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: 44px; line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+.hero p { max-width: 60ch; }
+.hero { display: flex; flex-direction: column; gap: 12px; }
+.rules { display: flex; flex-direction: column; gap: 6px; padding-left: 18px; margin: 0; }
+.profs { display: flex; flex-direction: column; }
+.prof { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 12px 4px; cursor: pointer; width: 100%; }
+.prof:hover { background: var(--card); }
+.prof-name { font-weight: 600; font-size: 16px; }
+.prof-pay { font-family: var(--font-data); font-size: 14px; text-align: right; white-space: nowrap; }
+.prof-note { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.prof-meta { grid-column: 1 / -1; font-family: var(--font-data); font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; }
+details { font-size: 13.5px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--ink); font-weight: 500; padding-block: 6px; }
+details ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+
+/* ---------- results ---------- */
+.verdict h1 { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -.02em; text-wrap: balance; }
+.verdict { display: flex; flex-direction: column; gap: 10px; }
+.reveal { font-family: var(--font-data); font-size: 13px; letter-spacing: .04em; }
+.chart { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .zero { stroke: var(--muted); stroke-width: 1; }
+.chart text { fill: var(--muted); font-family: var(--font-data); font-size: 16px; }
+.chart .real { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.chart .real-a { fill: var(--accent); opacity: .12; stroke: none; }
+.chart .nom { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .dot { fill: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid var(--accent); vertical-align: middle; margin-right: 6px; }
+.legend i.n { border-top: 1.5px dashed var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 8px 7px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+th { font-family: var(--font-data); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom-color: var(--ink); }
+td.num, th.num { text-align: right; padding-right: 0; padding-left: 8px; white-space: nowrap; }
+tr.me td { font-weight: 600; }
+.timeline { display: flex; flex-direction: column; gap: 8px; }
+.timeline div { display: grid; grid-template-columns: 74px 1fr; gap: 8px; font-size: 14px; }
+.timeline b { font-family: var(--font-data); font-weight: 500; font-size: 12.5px; color: var(--muted); padding-top: 2px; }
+@media (prefers-reduced-motion: no-preference) { .bar > i { transition: width .35s ease; } }
+body { margin: 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>var DATA = {"y0":1971,"q0":2,"sp":[103.0,99.0,97.29,103.3,108.8,107.2,109.6,118.4,110.3,105.8,109.8,96.11,92.46,79.31,69.44,72.56,84.72,92.49,88.57,96.86,101.9,104.2,101.9,103.8,99.05,100.2,93.74,90.25,92.71,97.19,100.6,99.71,102.1,102.7,104.5,110.9,103.0,119.8,130.2,133.0,134.4,129.1,119.8,117.3,116.3,109.4,132.7,144.3,157.7,167.0,167.7,166.4,157.6,151.1,164.8,171.6,180.6,192.5,186.2,208.2,238.0,240.2,237.4,264.5,289.3,310.1,280.2,250.5,262.6,269.1,277.4,285.4,302.3,331.9,347.4,339.97,338.18,360.03,307.12,325.49],"div":[3.1067,3.0967,3.0833,3.07,3.07,3.0733,3.1033,3.1567,3.1867,3.2367,3.3067,3.4,3.46,3.53,3.5933,3.6233,3.6833,3.71,3.7,3.6833,3.7133,3.79,3.9167,4.0967,4.2467,4.4067,4.5567,4.7133,4.8367,4.9467,5.0367,5.1133,5.2467,5.3967,5.5567,5.7,5.8467,5.9833,6.1,6.2,6.3167,6.4333,6.5567,6.66,6.75,6.8233,6.8567,6.8833,6.92,6.96,7.03,7.12,7.2233,7.3333,7.43,7.5733,7.6867,7.7733,7.86,7.94,8.0467,8.1433,8.2467,8.3,8.4,8.5667,8.71,8.8567,9.0433,9.3067,9.55,9.8133,10.0867,10.4233,10.7967,11.14,11.4367,11.7267,11.9267,12.1067],"cpi":[40.1,40.7,40.9,41.1,41.5,41.9,42.3,42.6,43.6,44.3,45.6,46.6,48.0,49.4,51.1,52.1,52.9,54.2,54.9,55.6,56.1,57.1,57.9,58.5,60.0,61.0,61.6,62.5,63.9,65.7,67.1,68.3,70.6,73.1,75.2,77.8,81.0,82.7,84.8,87.0,89.1,91.6,93.4,94.3,94.9,97.5,98.2,97.8,98.6,99.9,101.0,101.9,103.1,104.1,105.3,105.5,106.9,107.8,108.7,109.6,108.6,109.5,110.3,111.2,112.7,113.8,115.3,115.7,117.1,118.5,120.2,121.1,123.1,124.4,125.6,127.4,128.9,130.4,133.5,134.6],"gold":[39.0,41.0,43.0,46.0,49.0,66.0,65.0,65.0,91.0,120.0,100.0,129.0,172.0,143.0,159.0,176.0,170.0,165.0,143.0,131.0,128.0,118.0,116.0,132.0,149.0,143.0,159.0,173.0,175.0,189.0,227.0,227.0,239.0,295.0,392.0,675.0,517.0,643.0,661.0,557.0,496.0,409.0,438.0,384.0,350.0,339.0,422.0,481.0,433.0,403.0,394.0,371.0,381.0,348.0,341.0,303.0,327.0,317.0,326.0,347.0,340.0,348.0,424.0,408.0,438.0,451.0,465.0,477.0,452.0,438.0,407.0,404.0,384.0,375.0,367.0,410.0,374.0,363.0,381.0,384.0],"house":[25050,25550,25400,25850,26500,27350,28550,29700,31450,33100,33750,34600,35400,35900,36700,37650,38550,38900,40000,42000,43500,44300,44950,45900,47600,48850,50200,52300,54150,55700,57550,59800,61850,63900,63650,63150,63850,64450,65650,66600,68100,69300,69800,68400,68000,69450,70450,72450,74100,76150,76650,77050,79450,80850,80450,81350,83550,83750,85000,87400,90050,92550,94000,96450,100650,104700,108750,110750,110000,112500,114450,115950,118450,119450,122400,124350,125350,121900,119250,120750],"mort":[7.33,7.54,7.67,7.46,7.25,7.38,7.41,7.44,7.51,7.89,8.82,8.56,8.44,9.14,10.02,9.6,8.83,8.88,9.2,9.1,8.7,8.93,8.9,8.7,8.7,8.95,8.93,9.0,9.28,9.73,9.85,10.38,10.48,11.13,11.35,12.85,16.35,12.18,13.6,14.95,15.4,16.64,18.28,17.3,16.95,16.87,15.13,13.46,12.82,13.08,13.59,13.43,13.63,14.66,14.18,13.1,13.27,12.13,12.17,10.81,9.99,10.61,10.08,9.37,9.26,10.36,11.18,10.5,10.05,10.39,10.38,10.8,11.07,10.03,10.1,9.83,10.26,10.06,10.08,9.56],"un":[5.9,6.0,5.8,5.8,5.7,5.6,5.6,4.9,5.0,4.8,4.6,5.1,5.1,5.5,6.0,8.1,8.8,8.6,8.4,7.9,7.7,7.8,7.7,7.5,7.2,6.9,6.8,6.4,6.1,6.2,5.8,5.9,5.8,5.7,6.0,6.3,6.9,7.8,7.5,7.5,7.2,7.2,7.9,8.6,9.3,9.8,10.4,10.4,10.2,9.4,8.8,8.0,7.7,7.5,7.4,7.3,7.3,7.4,7.1,6.7,7.1,7.0,7.0,6.6,6.3,6.1,6.0,5.7,5.4,5.4,5.4,5.4,5.2,5.2,5.3,5.4,5.4,5.5,5.9,6.4],"tb":[3.86,5.4,4.46,3.38,3.71,3.98,4.74,5.41,6.26,8.01,7.22,7.77,8.33,7.55,7.46,6.26,5.61,6.13,5.96,4.87,4.86,5.23,4.92,4.62,4.54,5.19,6.16,6.44,6.29,7.01,7.99,9.35,9.46,9.24,11.7,12.0,13.2,8.06,11.62,15.02,13.69,14.95,13.54,12.28,12.7,11.35,7.71,7.86,8.21,9.08,8.64,8.9,9.69,10.12,9.74,7.76,7.95,7.08,7.16,7.07,6.06,5.83,5.18,5.43,5.64,5.69,6.13,5.81,5.91,6.73,7.35,8.27,8.65,7.88,7.64,7.64,7.77,7.62,7.17,6.22],"ahe":[3.58,3.63,3.68,3.8,3.86,3.9,3.97,4.03,4.09,4.15,4.21,4.27,4.33,4.45,4.56,4.61,4.67,4.74,4.82,4.9,4.98,5.06,5.16,5.26,5.36,5.46,5.55,5.66,5.79,5.9,6.02,6.13,6.21,6.36,6.46,6.57,6.72,6.86,7.02,7.18,7.33,7.45,7.59,7.72,7.77,7.9,7.96,8.06,8.13,8.22,8.31,8.38,8.45,8.51,8.55,8.61,8.69,8.74,8.79,8.85,8.88,8.91,8.96,9.02,9.08,9.12,9.22,9.29,9.36,9.45,9.56,9.65,9.75,9.83,9.92,10.02,10.12,10.22,10.3,10.37],"rent":[48.3,48.7,49.2,49.6,50.0,50.4,50.8,51.5,52.0,52.5,53.2,53.9,54.6,55.2,56.0,56.8,57.4,58.0,58.8,59.6,60.5,61.3,62.1,63.2,64.0,64.9,65.9,67.1,68.2,69.4,70.7,71.9,72.7,74.3,76.6,77.8,79.0,81.1,83.3,84.9,86.3,87.8,90.2,92.0,93.0,95.0,96.7,98.1,99.1,100.2,101.6,102.6,104.1,105.5,107.2,108.6,110.0,111.9,114.0,115.5,117.4,118.8,120.2,121.3,122.0,123.0,124.8,126.0,126.6,127.8,129.4,130.5,131.4,133.0,134.7,135.8,137.0,138.7,140.5,141.2],"infl":[4.2,4.4,3.8,3.3,3.5,2.9,3.4,3.6,5.1,5.7,7.8,9.4,10.1,11.5,12.1,11.8,10.2,9.7,7.4,6.7,6.0,5.4,5.5,5.2,7.0,6.8,6.4,6.8,6.5,7.7,8.9,9.3,10.5,11.3,12.1,13.9,14.7,13.1,12.8,11.8,10.0,10.8,10.1,8.4,6.5,6.4,5.1,3.7,3.9,2.5,2.9,4.2,4.6,4.2,4.3,3.5,3.7,3.6,3.2,3.9,1.6,1.6,1.5,1.5,3.8,3.9,4.5,4.0,3.9,4.1,4.2,4.7,5.1,5.0,4.5,5.2,4.7,4.8,6.3,5.7]};</script>
+<script>
+/* Game engine: pure functions over the game state. Runs in the browser and in Node. */
+(function (root) {
+  'use strict';
+  var E = {};
+  var D = null;
+  E.init = function (data) { D = data; E.D = data; };
+
+  E.LEN = 60;            // one game: 15 years, quarter by quarter
+  E.MAX_START = 19;      // start no later than 1976Q1 so the data lasts to the end
+  E.GOLD_LEGAL = 15;     // 1975Q1: from Dec 31, 1974 US citizens may own gold again
+  E.stockFee = function (q) { return q < 19 ? 0.02 : 0.015; };   // broker commission each way: fixed NYSE rates until 1975, cheaper from 1976
+  E.GOLD_FEE = 0.02;     // dealer markup on purchase
+  E.DOWN = 0.25;         // down payment
+  E.CLOSING = 0.02;      // closing costs on purchase
+  E.SELL_COST = 0.06;    // realtor and fees on sale
+  E.REFI_FEE = 0.02;     // refinancing cost as a share of the balance
+  E.RENT_YIELD = 0.07;   // annual rent to house price in 1971; afterwards rent follows CPI Rent
+  E.RENT_KEEP = 0.65;    // share of rent left after property tax, repairs, insurance, vacancy
+  E.CARD_RATE = 18;     // credit card: 18% a year (Fed G.19, 1972-1991: 16.9-18.9%)
+  E.BENEFIT = 0.50;      // unemployment benefit: half of gross pay (untaxed until 1979)...
+  E.BENEFIT_CAP = 864.6; // ...up to a cap: $66.51 a week in July 1972, indexed to wages
+  E.CREEP = 0.35;        // share of real pay growth that goes into lifestyle
+  E.KIDS = [1, 1.25, 1.45]; // expenses with 0, 1, 2 children (BLS equivalence scale, 1968)
+  E.LOAN_RATE = 7;       // student loan, % per year
+  E.WIN_STREAK = 4;      // quarters in a row passive income must cover expenses
+
+  /* 10 careers. base: entry-level annual pay before tax in 1971 dollars.
+     curve: [[until year of experience, real growth per year], ...]; jump: step up after residency. */
+  E.PROFS = [
+    { id: 'seller',  name: 'Retail clerk',        age: 18, base: 4200,  share: 0.77, sens: 1.0,  debt: 0,    curve: [[10, 0.015]],
+      note: 'The most common job in the country. Low pay, slow raises.' },
+    { id: 'factory', name: 'Auto worker',         age: 18, base: 8800,  share: 0.67, sens: 2.2,  debt: 0,    curve: [[3, 0.03], [15, 0.005]],
+      note: 'Good money from day one, but first to go in a downturn.' },
+    { id: 'trucker', name: 'Truck driver',        age: 21, base: 8000,  share: 0.70, sens: 1.3,  debt: 0,    curve: [[8, 0.05]],
+      note: 'Starts on local routes and works up to long haul in 8 years.' },
+    { id: 'nurse',   name: 'Nurse',               age: 21, base: 7600,  share: 0.70, sens: 0.3,  debt: 0,    curve: [[8, 0.03]],
+      note: 'There is always work, but the pay ceiling is close.' },
+    { id: 'teacher', name: 'Teacher',             age: 22, base: 7060,  share: 0.70, sens: 0.4,  debt: 1500, curve: [[11, 0.035]],
+      note: 'A step raise every year, layoffs are rare.' },
+    { id: 'police',  name: 'Police officer',      age: 21, base: 8000,  share: 0.69, sens: 0.25, debt: 0,    curve: [[4, 0.05], [15, 0.015]],
+      note: 'Steady in any economy, fast raises in the first 5 years.' },
+    { id: 'account', name: 'Accountant',          age: 22, base: 10150, share: 0.65, sens: 0.5,  debt: 1500, curve: [[10, 0.06], [15, 0.007]],
+      note: 'College graduate. Pay nearly doubles in 10 years.' },
+    { id: 'engineer',name: 'Engineer',            age: 22, base: 10600, share: 0.63, sens: 0.6,  debt: 1500, curve: [[10, 0.05], [15, 0.015]],
+      note: 'High starting pay, but the industry lives on contracts and the cycle.' },
+    { id: 'lawyer',  name: 'Lawyer',              age: 25, base: 12000, share: 0.65, sens: 0.35,  debt: 4000, curve: [[10, 0.09], [15, 0.03]],
+      note: 'Law school debt, but the steepest raises.' },
+    { id: 'doctor',  name: 'Doctor',              age: 26, base: 9000,  share: 0.70, sens: 0.1,  debt: 6000, curve: [[4, 0.03], [12, 0.025]], jumpAt: 4, jump: 3.6,
+      note: '4 years of residency on a stipend, then income jumps several times over.' }
+  ];
+  E.prof = function (id) { for (var i = 0; i < E.PROFS.length; i++) if (E.PROFS[i].id === id) return E.PROFS[i]; return null; };
+
+  function rng(seed) {            // mulberry32
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  E.career = function (p, years) {
+    var m = 1, prev = 0;
+    for (var i = 0; i < p.curve.length; i++) {
+      var until = p.curve[i][0], g = p.curve[i][1];
+      var span = Math.min(years, until) - prev;
+      if (span > 0) m *= Math.pow(1 + g, span);
+      prev = until;
+      if (years <= until) break;
+    }
+    if (p.jumpAt != null && years >= p.jumpAt) m *= p.jump;
+    return m;
+  };
+  E.taxRate = function (g71) { return Math.max(clamp(0.10 + 0.085 * Math.log(g71 / 5000) / Math.LN2, 0.08, 0.38), Math.min(0.20, 0.145 + 0.06 * Math.log(g71 / 4200) / Math.LN2)); };
+
+  /* Quarterly pay: {gross, net} when employed */
+  E.pay = function (s, q, t) {
+    var p = E.prof(s.prof);
+    if (q == null) q = s.q;
+    if (t == null) t = s.t;
+    var g71 = p.base * E.career(p, t / 4) * s.promo;
+    var gross = g71 * D.ahe[q] / D.ahe[0] / 4;
+    return { gross: gross, net: gross * (1 - E.taxRate(g71)) };
+  };
+  E.benefit = function (s, q) { if (q == null) q = s.q; return Math.min(E.BENEFIT * E.pay(s, q).gross, E.BENEFIT_CAP * D.ahe[q] / D.ahe[5]); };
+  E.expenses = function (s, q) {
+    if (q == null) q = s.q;
+    return s.life * D.cpi[q] / D.cpi[s.start] * E.KIDS[s.kids];
+  };
+  E.rentQ = function (q) { return 3 * D.house[0] * E.RENT_YIELD / 12 * D.rent[q] / D.rent[0]; };
+  E.mortPay = function (bal, rate) {          // quarterly payment, 30 years
+    var r = rate / 1200;
+    return 3 * bal * r / (1 - Math.pow(1 + r, -360));
+  };
+  function amortize(h) {
+    var r = h.rate / 1200, m = h.pay / 3;
+    for (var k = 0; k < 3; k++) { h.bal = Math.max(0, h.bal * (1 + r) - m); }
+  }
+  E.houseNet = function (h, q) { return E.rentQ(q) * E.RENT_KEEP - h.pay; };
+
+  E.newGame = function (profId, seed, start) {
+    var r = rng(seed);
+    if (start == null) start = Math.floor(r() * (E.MAX_START + 1));
+    var rolls = [];
+    for (var i = 0; i < E.LEN; i++) rolls.push([r(), r(), r(), r()]);
+    var p = E.prof(profId);
+    var s = {
+      prof: profId, seed: seed, start: start, t: 0, q: start,
+      cash: 0, units: 0, oz: 0, houses: [], loan: null,
+      employed: true, off: 0, promo: 1, kids: 0, life: 0, life0: 0, net0: 0,
+      streak: 0, won: false, wonAt: null, over: false, bankrupt: false,
+      rolls: rolls, hist: [], log: [], cost: { units: 0, oz: 0 }
+    };
+    var pay = E.pay(s);
+    s.net0 = pay.net;
+    s.life0 = s.life = p.share * pay.net;
+    s.cash = Math.round(pay.net * 0.5);
+    if (p.debt) {
+      var bal = Math.round(p.debt * D.ahe[start] / D.ahe[0] / 100) * 100;
+      var rr = E.LOAN_RATE / 400;
+      s.loan = { bal: bal, pay: bal * rr / (1 - Math.pow(1 + rr, -40)) };
+    }
+    s.hist.push(E.snapshot(s));
+    return s;
+  };
+
+  E.netWorth = function (s) {
+    var q = s.q, nw = s.cash + s.units * D.sp[q] + s.oz * D.gold[q];
+    for (var i = 0; i < s.houses.length; i++) nw += D.house[q] - s.houses[i].bal;
+    if (s.loan) nw -= s.loan.bal;
+    return nw;
+  };
+  E.passive = function (s) {
+    var q = s.q;
+    var interest = s.cash > 0 ? s.cash * D.tb[q] / 400 : 0;
+    var div = s.units * D.div[q] / 4;
+    var rent = 0;
+    for (var i = 0; i < s.houses.length; i++) rent += E.houseNet(s.houses[i], q);
+    return { interest: interest, div: div, rent: rent, total: interest + div + rent };
+  };
+  E.required = function (s) { return E.expenses(s) + (s.loan ? Math.min(s.loan.pay, s.loan.bal * (1 + E.LOAN_RATE / 400)) : 0); };
+  E.freedom = function (s) { return E.passive(s).total / E.required(s); };
+  E.snapshot = function (s) {
+    var nw = E.netWorth(s);
+    return { t: s.t, nw: nw, real: nw * D.cpi[s.start] / D.cpi[s.q], free: E.freedom(s) };
+  };
+
+  /* ---------- player actions (at start-of-quarter prices) ---------- */
+  E.buyStock = function (s, amount) {
+    amount = Math.min(amount, s.cash); if (amount <= 0) return false;
+    s.units += amount * (1 - E.stockFee(s.q)) / D.sp[s.q]; s.cash -= amount; s.cost.units += amount; return true;
+  };
+  E.sellStock = function (s, frac) {
+    if (s.units <= 0) return false;
+    var u = s.units * frac; s.cash += u * D.sp[s.q] * (1 - E.stockFee(s.q)); s.cost.units *= (1 - frac); s.units -= u;
+    if (s.units < 1e-9) { s.units = 0; s.cost.units = 0; } return true;
+  };
+  E.goldOpen = function (s) { return s.q >= E.GOLD_LEGAL; };
+  E.buyGold = function (s, amount) {
+    if (!E.goldOpen(s)) return false;
+    amount = Math.min(amount, s.cash); if (amount <= 0) return false;
+    s.oz += amount * (1 - E.GOLD_FEE) / D.gold[s.q]; s.cash -= amount; s.cost.oz += amount; return true;
+  };
+  E.sellGold = function (s, frac) {
+    if (s.oz <= 0) return false;
+    var o = s.oz * frac; s.cash += o * D.gold[s.q]; s.cost.oz *= (1 - frac); s.oz -= o;
+    if (s.oz < 1e-9) { s.oz = 0; s.cost.oz = 0; } return true;
+  };
+  /* House purchase terms: what it takes and whether the bank approves */
+  E.houseQuote = function (s) {
+    var q = s.q, price = D.house[q], rate = D.mort[q];
+    var loan = price * (1 - E.DOWN), pay = E.mortPay(loan, rate);
+    var need = price * (E.DOWN + E.CLOSING);
+    var rent = E.rentQ(q), sumPay = pay, n = s.houses.length + 1;
+    for (var i = 0; i < s.houses.length; i++) sumPay += s.houses[i].pay;
+    var limit = (q >= 55 ? 0.22 : 0.20) * E.pay(s).gross + 0.75 * rent * n;
+    var why = null;
+    if (!s.employed) why = 'job';
+    else if (s.cash < need) why = 'cash';
+    else if (sumPay > limit) why = 'bank';
+    return { price: price, rate: rate, loan: loan, pay: pay, need: need, rent: rent, net: rent * E.RENT_KEEP - pay, ok: !why, why: why, sumPay: sumPay, limit: limit };
+  };
+  E.buyHouse = function (s) {
+    var k = E.houseQuote(s); if (!k.ok) return false;
+    s.cash -= k.need;
+    s.houses.push({ bought: s.q, price: k.price, bal: k.loan, rate: k.rate, pay: k.pay });
+    return true;
+  };
+  E.houseSale = function (s, i) { var h = s.houses[i]; return D.house[s.q] * (1 - E.SELL_COST) - h.bal; };
+  E.sellHouse = function (s, i) {
+    if (!s.houses[i]) return false;
+    s.cash += E.houseSale(s, i); s.houses.splice(i, 1); return true;
+  };
+  E.refiQuote = function (s, i) {
+    var h = s.houses[i], rate = D.mort[s.q], fee = h.bal * E.REFI_FEE;
+    var pay = E.mortPay(h.bal, rate);
+    return { rate: rate, fee: fee, pay: pay, saves: h.pay - pay, ok: rate <= h.rate - 1 && s.cash >= fee && h.bal > 0, offered: rate <= h.rate - 1 && h.bal > 0 };
+  };
+  E.refinance = function (s, i) {
+    var k = E.refiQuote(s, i); if (!k.ok) return false;
+    var h = s.houses[i]; s.cash -= k.fee; h.rate = k.rate; h.pay = k.pay; return true;
+  };
+  E.payLoan = function (s, amount) {
+    if (!s.loan) return false;
+    amount = Math.min(amount, s.cash, s.loan.bal); if (amount <= 0) return false;
+    s.cash -= amount; s.loan.bal -= amount; if (s.loan.bal < 0.5) s.loan = null; return true;
+  };
+
+  var COSTS = ['The car broke down, repairs', 'A bill from the dentist', 'A week in the hospital, insurance didn’t cover it all', 'A crash on the road, a fine and repairs', 'An emergency flight home to family', 'A break-in at the apartment'];
+  var GAINS = ['Tax refund', 'Year-end bonus', 'A small inheritance from an aunt', 'Weekend side job'];
+
+  /* ---------- a turn: live through one quarter ---------- */
+  E.step = function (s) {
+    if (s.over) return null;
+    var q = s.q, roll = s.rolls[s.t], p = E.prof(s.prof);
+    var pay = E.pay(s), wasEmployed = s.employed;
+    var f = {};
+    f.salary = wasEmployed ? pay.net : E.benefit(s, q);
+    f.expenses = E.expenses(s, q);
+    f.interest = s.cash > 0 ? s.cash * D.tb[q] / 400 : s.cash * E.CARD_RATE / 400;
+    f.div = s.units * D.div[q] / 4;
+    f.rent = 0;
+    for (var i = 0; i < s.houses.length; i++) { f.rent += E.houseNet(s.houses[i], q); amortize(s.houses[i]); }
+    f.loan = 0;
+    if (s.loan) {
+      var due = s.loan.bal * (1 + E.LOAN_RATE / 400);
+      f.loan = Math.min(s.loan.pay, due);
+      s.loan.bal = due - f.loan;
+      if (s.loan.bal < 0.5) s.loan = null;
+    }
+    f.event = 0;
+    var notes = [];
+
+    // a personal event
+    var r = roll[1];
+    if (r < 0.07) {
+      f.event = -(0.25 + 0.45 * roll[2]) * f.expenses;
+      notes.push({ kind: 'bad', text: COSTS[Math.floor(roll[3] * COSTS.length)] + ': −$' + fmt(-f.event) });
+    } else if (r < 0.10) {
+      f.event = (0.2 + 0.3 * roll[2]) * pay.net;
+      notes.push({ kind: 'good', text: GAINS[Math.floor(roll[3] * GAINS.length)] + ': +$' + fmt(f.event) });
+    } else if (r < 0.125 && s.kids < 2 && s.t >= 4 && s.t < 36) {
+      s.kids++;
+      notes.push({ kind: 'life', text: 'A baby was born into the family. Expenses went up ' + Math.round((E.KIDS[s.kids] / E.KIDS[s.kids - 1] - 1) * 100) + '%.' });
+    } else if (r < 0.145 && wasEmployed && s.t >= 2) {
+      s.promo *= 1.07;
+      notes.push({ kind: 'good', text: 'Promotion: pay +7%.' });
+    }
+
+    // the job: layoff odds follow the country's real unemployment rate
+    if (wasEmployed) {
+      var inResidency = p.jumpAt != null && s.t / 4 < p.jumpAt;
+      var pj = clamp((D.un[q] - 3.5) * 0.008, 0.004, 0.07) * p.sens;
+      if (!inResidency && s.t >= 2 && roll[0] < pj) {
+        s.employed = false;
+        s.off = 1 + (D.un[q] > 7.5 ? 1 : 0) + (roll[3] < 0.3 ? 1 : 0);
+        notes.push({ kind: 'bad', text: 'You were laid off. While you look for work, you live on unemployment: half your pay before tax, up to the state cap.' });
+      }
+    } else {
+      s.off--;
+      if (s.off <= 0) { s.employed = true; notes.push({ kind: 'good', text: 'You are back at work.' }); }
+    }
+
+    f.total = f.salary - f.expenses + f.interest + f.div + f.rent - f.loan + f.event;
+    s.cash += f.total;
+
+    var prev = q;
+    s.q = q + 1; s.t += 1;
+
+    // lifestyle catches up with real pay growth
+    var now = E.pay(s);
+    var realNet = now.net * D.cpi[s.start] / D.cpi[s.q];
+    var target = s.life0 + E.CREEP * Math.max(0, realNet - s.net0);
+    var lifeUp = false;
+    if (target > s.life * 1.0005) { lifeUp = target > s.life * 1.15; s.life = target; }
+    if (p.jumpAt != null && s.t / 4 === p.jumpAt) notes.push({ kind: 'good', text: 'Residency is over. You are a practicing physician and your income has grown several times over. Your expenses grew with it.' });
+    else if (lifeUp) notes.push({ kind: 'life', text: 'Your income went up, and so did your lifestyle.' });
+
+    // forced sale if credit card debt goes over the limit
+    var limit = 2 * now.net;
+    if (s.cash < -limit) {
+      if (s.oz > 0) { E.sellGold(s, 1); notes.push({ kind: 'bad', text: 'The bank called in your debt: your gold was sold.' }); }
+      if (s.cash < -limit && s.units > 0) { E.sellStock(s, 1); notes.push({ kind: 'bad', text: 'The bank called in your debt: your stocks were sold.' }); }
+      while (s.cash < -limit && s.houses.length) { E.sellHouse(s, 0); notes.push({ kind: 'bad', text: 'The bank called in your debt: a house was sold.' }); }
+      if (s.cash < -limit) { s.over = true; s.bankrupt = true; notes.push({ kind: 'bad', text: 'Your debts are more than you can carry. Bankruptcy.' }); }
+    }
+
+    var free = E.freedom(s);
+    if (free >= 1) s.streak++; else s.streak = 0;
+    if (!s.won && s.streak >= E.WIN_STREAK) { s.won = true; s.wonAt = s.t; }
+    if (s.t >= E.LEN) s.over = true;
+    s.hist.push(E.snapshot(s));
+
+    var rep = {
+      q: prev, t: s.t - 1, flows: f, notes: notes,
+      d: {
+        sp: D.sp[s.q] / D.sp[prev] - 1, gold: D.gold[s.q] / D.gold[prev] - 1,
+        house: D.house[s.q] / D.house[prev] - 1, cpi: D.cpi[s.q] / D.cpi[prev] - 1
+      },
+      goldOpened: s.q === E.GOLD_LEGAL
+    };
+    s.log.push(rep);
+    return rep;
+  };
+
+  function fmt(x) { return Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  E.fmt = fmt;
+  E.label = function (q) {      // {y: 1973, k: 2}
+    var n = D.q0 - 1 + q, y = D.y0 + Math.floor(n / 4), k = n % 4;
+    return { y: y, k: k + 1 };
+  };
+
+  /* ---------- simple strategies to compare against ---------- */
+  E.BOTS = {
+    deposit: { name: 'Everything in the bank', act: function () {} },
+    stocks: { name: 'All spare cash into stocks', act: function (s) { var keep = E.expenses(s); if (s.cash > keep) E.buyStock(s, s.cash - keep); } },
+    houses: { name: 'Buy a house as soon as the bank says yes', act: function (s) { var keep = E.expenses(s) * 0.5; var k = E.houseQuote(s); if (k.ok && s.cash - k.need > keep) E.buyHouse(s); } }
+  };
+  E.runBot = function (profId, seed, start, bot) {
+    var s = E.newGame(profId, seed, start);
+    while (!s.over) { bot.act(s); E.step(s); }
+    return s;
+  };
+
+  root.Engine = E;
+  if (typeof module !== 'undefined' && module.exports) module.exports = E;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/* Quarterly headlines: what happened that quarter. No years or names, because the year is hidden. Checked against sources, see README. */
+var NEWS = {
+  '1971Q2': 'The dollar is under pressure: West Germany lets the mark float freely, and speculators expect a devaluation.',
+  '1971Q3': 'The President closes the "gold window": dollars can no longer be exchanged for gold. Prices and wages are frozen for 90 days.',
+  '1971Q4': 'The dollar is devalued for the first time in decades. Wage and price controls are extended.',
+  '1972Q1': 'The President flies to Beijing. The economy is speeding up, and price controls are holding inflation down for now.',
+  '1972Q3': 'The Soviet Union buys a quarter of the American wheat crop. Export grain prices jump 40%.',
+  '1972Q4': 'The Dow Jones closes above 1,000 for the first time ever. The President is re-elected in a landslide.',
+  '1973Q1': 'The dollar is devalued a second time, now by 10%. The major currencies are set floating.',
+  '1973Q2': 'Meat prices spike and shoppers stage a boycott. The President freezes prices again, for 60 days.',
+  '1973Q3': 'The freeze is lifted and food posts a record monthly price jump. The Fed raises its discount rate to an all-time high.',
+  '1973Q4': 'War in the Middle East. Arab states impose an oil embargo, and OPEC is multiplying oil prices.',
+  '1974Q1': 'Lines at gas stations, gasoline sold on odd and even days. The embargo is lifted, but oil will not get cheaper again.',
+  '1974Q2': 'Inflation hits double digits. Banks raise rates to records, and one of the country’s largest banks is on the edge of collapse.',
+  '1974Q3': 'The President resigns over a political scandal. Stocks are falling for the second year running.',
+  '1974Q4': 'The new President hands out "Whip Inflation Now" buttons. Auto plants shut down their assembly lines. From December 31, citizens may own gold again, for the first time in 41 years.',
+  '1975Q1': 'Unemployment tops 8%, the highest since before the war. Congress approves a partial income tax rebate.',
+  '1975Q2': 'Saigon has fallen and the war is over. Unemployment reaches 9%, but economists say the slump has bottomed out.',
+  '1975Q3': 'New York City can’t pay its debts. The city asks Washington for help.',
+  '1975Q4': 'The President refuses to bail out New York, then changes his mind a month later: the city gets federal loans.',
+  '1976Q1': 'The Dow is back above 1,000. The economy is growing faster than 9% at an annual rate.',
+  '1976Q4': 'The opposition candidate wins the election on a promise of jobs.',
+  '1977Q1': 'The harshest winter in decades. Natural gas runs short, factories and schools close, workers are sent on unpaid leave.',
+  '1977Q2': 'The President calls the fight against the energy crisis "the moral equivalent of war" and asks the country for thrift and sacrifice.',
+  '1977Q3': '"Black Monday" in Ohio: a steel mill is closing, and 5,000 people are out of work.',
+  '1977Q4': 'The dollar falls against the mark and the yen. Coal miners begin a nationwide strike.',
+  '1978Q1': 'The coal strike is in its fourth month. The dollar keeps weakening.',
+  '1978Q2': 'California voters slash property taxes in a ballot measure. Banks are allowed to offer certificates of deposit at market rates.',
+  '1978Q3': 'Inflation is picking up: by September prices are rising more than 8% a year.',
+  '1978Q4': 'An emergency rescue of the dollar: the Fed raises its rate by a full point at once. Strikes in Iran halt its oil exports.',
+  '1979Q1': 'Revolution in Iran, the Shah has fled. An accident at a nuclear plant in Pennsylvania.',
+  '1979Q2': 'Gasoline is gone again: lines at the pumps, and OPEC raises prices once more.',
+  '1979Q3': 'The President speaks of a "crisis of confidence". The Fed gets a new chairman known as a hard-line inflation fighter. A business magazine runs the cover "The Death of Equities".',
+  '1979Q4': 'On a Saturday night the Fed announces a new policy: rates are set loose and soar. Hostages are taken in Tehran, Soviet troops enter Afghanistan.',
+  '1980Q1': 'Gold peaks at $850 an ounce. Inflation is nearly 15%. The government restricts consumer credit, and the silver market crashes in a single day.',
+  '1980Q2': 'The economy contracts sharply as people stop borrowing. Rates fall as fast as they rose.',
+  '1980Q3': 'The recession hits bottom only six months after it began. Rates start climbing again.',
+  '1980Q4': 'The election goes to the candidate who promised to cut taxes. Banks raise the prime rate to 21.5%, an all-time record.',
+  '1981Q1': 'The hostages are freed on Inauguration Day. The new President proposes cutting taxes and spending.',
+  '1981Q2': 'The interbank lending rate shoots from 15% to 19%. Mortgages cost over 16%: few can afford a house or a car on credit.',
+  '1981Q3': 'The biggest tax cut in history is signed. The President fires 11,000 striking air traffic controllers. A new recession begins.',
+  '1981Q4': 'Mortgages cost more than 18% a year, higher than ever. New home sales are near a record low.',
+  '1982Q1': 'Unemployment reaches 9%. Home builders mail lumber scraps to the Fed chairman, car dealers send keys to unsold cars.',
+  '1982Q2': 'A major airline goes bankrupt. Businesses are failing faster than at any time since the Great Depression.',
+  '1982Q3': 'Mexico announces it can’t pay its debts. The Fed cuts rates, and the stock market answers with a record one-day gain.',
+  '1982Q4': 'Unemployment is 10.8%, the highest since the Great Depression. Yet the Dow sets an all-time high.',
+  '1983Q1': 'Inflation drops below 4%. The economy is coming out of recession.',
+  '1983Q2': 'The economy grows faster than 9% at an annual rate. A boom in new stock offerings.',
+  '1983Q3': 'The recovery gathers pace: factories are hiring again.',
+  '1984Q1': 'The telephone monopoly is split into eight companies. The economy grows 8% at an annual rate.',
+  '1984Q2': 'Depositors flee the country’s seventh-largest bank. The government rescues it, the largest such operation in history.',
+  '1984Q4': 'The President is re-elected, winning 49 states out of 50.',
+  '1985Q1': 'Ohio’s governor closes about 70 savings and loans after a run by depositors. The dollar is at a record high.',
+  '1985Q3': 'Five leading industrial nations agree, in a New York hotel, to push the dollar down.',
+  '1985Q4': 'The Dow tops 1,500 for the first time. The dollar is falling fast.',
+  '1986Q1': 'Oil has crashed by half in a few months. Gasoline is getting cheaper, layoffs in Texas.',
+  '1986Q2': 'Mortgages below 10% for the first time in more than seven years. Lines to refinance.',
+  '1986Q3': 'Inflation stays below 2%, something not seen in two decades.',
+  '1986Q4': 'A tax reform is signed: the top rate is cut to 28% and breaks for real estate investors are cut back. An insider trading scandal hits Wall Street.',
+  '1987Q1': 'The Dow tops 2,000 for the first time. The bull market is in its fifth year.',
+  '1987Q2': 'A major oil company files for bankruptcy, the largest in history. Bond yields head up.',
+  '1987Q3': 'The Fed has a new chairman. The Dow is at a record, above 2,700.',
+  '1987Q4': '"Black Monday": the Dow loses 22.6% in a single day, the worst day in the index’s history.',
+  '1988Q1': 'No recession after the crash: the economy is growing, and the Fed backed the markets with cash.',
+  '1988Q3': 'Drought in the Midwest, the worst in half a century. In Texas the state’s largest bank collapses.',
+  '1988Q4': 'The deal of the century: a tobacco and food giant goes to investors for $25 billion, almost all of it borrowed. The Vice President wins the election.',
+  '1989Q1': 'Hundreds of savings and loans are insolvent. The President proposes saving depositors with public money. The Fed’s rate is near 10%.',
+  '1989Q3': 'The savings and loan bailout law is signed: the government will sell off their property, from houses and offices to land.',
+  '1989Q4': 'On Friday the 13th the Dow drops 190 points. The Berlin Wall falls.',
+  '1990Q1': 'The leading junk-bond investment bank goes bankrupt. The era of debt-financed buyouts is over.',
+  '1990Q2': 'Real estate in the Northeast is getting cheaper, and banks are counting losses on developer loans.',
+  '1990Q3': 'Iraq invades Kuwait. Oil nearly doubles, the economy is sliding into recession.',
+  '1990Q4': 'Economists agree: a recession has begun. Layoffs, and banks tighten credit. The President breaks his promise and raises taxes.'
+};
+</script>
+<script>
+(function () {
+  'use strict';
+  var E = window.Engine, D = DATA;
+  E.init(D);
+  var app = document.getElementById('app');
+  var G = null, screen = 'start', offer = null, turnStart = null, dirty = false, askQuit = false;
+  var SAVE = 'shoes-save-v1';
+  var ROMAN = ['Q1', 'Q2', 'Q3', 'Q4'];
+  var NB = ' ';
+  var WHY = { job: 'Banks don’t give mortgages to the unemployed.', cash: 'You don’t have enough in the bank for the down payment and closing costs.', bank: 'The bank said no: at this rate, the payments would take too large a share of your income.' };
+  var NAME = 'In Someone Else’s Shoes';
+
+  /* ---------- formatting ---------- */
+  function fmt(x) { return E.fmt(Math.abs(x)); }
+  function money(x) { return (x < -0.5 ? '−' : '') + '$' + fmt(x); }
+  function signed(x) { return Math.abs(x) < 0.5 ? '$0' : (x < 0 ? '−' : '+') + '$' + fmt(x); }
+  function cls(x) { return Math.abs(x) < 0.5 ? '' : (x < 0 ? 'neg' : 'pos'); }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d).replace('-', '−') + '%'; }
+  function spct(x, d) { return (x >= 0 ? '+' : '') + pct(x, d); }
+  function rate(v, d) { return v.toFixed(d == null ? 1 : d) + '%'; }
+  function times(x) { return '×' + (x >= 10 ? x.toFixed(0) : x.toFixed(1)); }
+  function yearsWord(n) { return n === 1 ? 'year' : 'years'; }
+  function ordinal(n) { var b = n % 100, a = n % 10; return n + ((b >= 11 && b <= 13) ? 'th' : a === 1 ? 'st' : a === 2 ? 'nd' : a === 3 ? 'rd' : 'th'); }
+  function short(v) {
+    var a = Math.abs(v), s = v < 0 ? '−' : '';
+    if (a >= 1e6) return s + '$' + (a / 1e6).toFixed(1) + 'M';
+    if (a >= 1e4) return s + '$' + Math.round(a / 1e3) + 'k';
+    return s + '$' + fmt(a);
+  }
+  function qKey(q) { var l = E.label(q); return l.y + 'Q' + l.k; }
+  function row(label, value, c, tag) {
+    return '<div class="row"><span>' + label + (tag ? '<span class="tag">' + tag + '</span>' : '') + '</span><span class="dots"></span><span class="num ' + (c || '') + '">' + value + '</span></div>';
+  }
+  function spark(arr) {
+    if (arr.length < 2) arr = [arr[0], arr[0]];
+    var w = 96, h = 32, p = 4, mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), n = arr.length, pts = [];
+    for (var i = 0; i < n; i++) {
+      var x = p + i / (n - 1) * (w - 2 * p), y = mx === mn ? h / 2 : h - p - (arr[i] - mn) / (mx - mn) * (h - 2 * p);
+      pts.push(x.toFixed(1) + ' ' + y.toFixed(1));
+    }
+    var last = pts[n - 1].split(' ');
+    return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true"><path class="a" d="M' + pts.join('L') + 'L' + (w - p) + ' ' + h + 'L' + p + ' ' + h + 'Z"/><path class="l" d="M' + pts.join('L') + '"/><circle cx="' + last[0] + '" cy="' + last[1] + '" r="2.6"/></svg>';
+  }
+
+  /* ---------- saving ---------- */
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify({ G: G, screen: screen, offer: offer })); } catch (e) { /* without storage the game just won't survive a reload */ } }
+  function load() { try { var d = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (d && d.offer) { G = d.G; screen = d.screen; offer = d.offer; } } catch (e) { G = null; } }
+  function newOffer() { var seed = Math.floor(Math.random() * 2147483647) + 1; offer = { seed: seed, start: seed % (E.MAX_START + 1) }; }
+  function markTurn() { turnStart = JSON.stringify(G); dirty = false; }
+
+  /* ---------- career picker ---------- */
+  function viewStart() {
+    var h = '<section class="hero"><div class="eyebrow">A game on real US economic data</div><h1>' + NAME + '</h1>' +
+      '<p>You have just started your first job. Fifteen years lie ahead, one turn per quarter. Wages, prices, interest rates, stocks, houses and gold move exactly the way they really did. You are not told what year it is.</p>' +
+      '<ul class="rules"><li><b>Goal.</b> Passive income (interest, dividends and rent) covers your expenses four quarters in a row.</li>' +
+      '<li><b>Your turn.</b> Decide where your money goes: leave it in the bank, buy stocks, gold or a house with a mortgage. Then live through the quarter and read the news.</li>' +
+      '<li><b>Life.</b> Layoffs, medical bills and promotions are random. The higher the country’s unemployment, the likelier a layoff.</li></ul></section>';
+    if (G && !G.over && !G.won) {
+      var p0 = E.prof(G.prof);
+      h += '<button class="btn" data-a="resume">Continue your game: ' + p0.name.toLowerCase() + ', year ' + (Math.floor(G.t / 4) + 1) + '</button>';
+    }
+    h += '<section class="block"><h2>Pick a career. You start on day one</h2><div class="profs">';
+    E.PROFS.forEach(function (p) {
+      var payY = Math.round(p.base * D.ahe[offer.start] / D.ahe[0] / 10) * 10;
+      var risk = p.sens < 0.5 ? 'rarely laid off' : p.sens < 1.15 ? 'average layoff risk' : 'often laid off';
+      var meta = ['starts at ' + p.age, 'pay growth over 15 years ' + times(E.career(p, 15)), risk];
+      if (p.debt) meta.push('student debt ' + money(Math.round(p.debt * D.ahe[offer.start] / D.ahe[0] / 100) * 100));
+      h += '<button class="prof" data-a="pick" data-id="' + p.id + '"><span class="prof-name">' + p.name + '</span><span class="prof-pay">' + money(payY) + ' a year</span>' +
+        '<span class="prof-note">' + p.note + '</span><span class="prof-meta"><span>' + meta.join('</span><span>') + '</span></span></button>';
+    });
+    h += '</div></section>' + sources();
+    return h;
+  }
+  function sources() {
+    return '<details><summary>Where the data comes from and what is simplified</summary><ul>' +
+      '<li>Stocks and dividends: the S&amp;P 500 from Robert Shiller’s tables, monthly average.</li>' +
+      '<li>Prices and rent: US Bureau of Labor Statistics consumer price indexes (CPI-U and CPI Rent).</li>' +
+      '<li>Wages: average hourly earnings of production workers (series AHETPI). Unemployment: series UNRATE.</li>' +
+      '<li>Bank account: 3-month Treasury bill rate (TB3MS). Mortgage: Freddie Mac 30-year fixed rate.</li>' +
+      '<li>House: median price of a new home (series MSPUS), smoothed over two quarters. Gold: monthly average price.</li>' +
+      '<li>Careers: starting salaries, raises, student loans and layoff risk were checked against period surveys (BLS pay surveys, College Placement Council offers, NEA teacher salary schedules, union wage chronologies, AMA physician income).</li>' +
+      '<li>Rules checked against period sources: taxes, the credit card rate (18%), broker commissions, unemployment benefits, the down payment (25%), mortgage approval, rent (7% of the house price a year at the start) and the cost of children.</li>' +
+      '<li>One deliberate simplification: living costs are 63–77% of take-home pay. Real families with these incomes spent 83–92% (BLS Consumer Expenditure Survey 1972–73, Bulletin 1985, table 1), which would make the game almost impossible to win.</li>' +
+      '</ul></details>';
+  }
+
+  /* ---------- game screen ---------- */
+  function header() {
+    var p = E.prof(G.prof), yr = Math.floor(G.t / 4), age = p.age + yr;
+    var h = '<header class="top"><div class="top-row"><span class="brand">' + NAME + '</span><span class="when">Year ' + (yr + 1) + ' of 15 · ' + ROMAN[G.t % 4] + '</span></div>' +
+      '<div class="top-row"><span class="who">' + p.name + ', age ' + age + (G.employed ? '' : ' · <span class="neg">out of work</span>') + (G.kids ? ' · kids: ' + G.kids : '') + '</span>' +
+      '<button class="chip" data-a="quit">' + (askQuit ? 'Sure? This game will be erased' : 'Start over') + '</button></div><div class="years" aria-hidden="true">';
+    for (var y = 0; y < 15; y++) {
+      h += '<div class="year">';
+      for (var k = 0; k < 4; k++) { var t = y * 4 + k; h += '<i class="tick ' + (t < G.t ? 'done' : t === G.t ? 'now' : '') + '"></i>'; }
+      h += '</div>';
+    }
+    return h + '</div></header>';
+  }
+  function wire() {
+    var p = E.prof(G.prof);
+    if (!G.log.length) {
+      var intro = 'Your first day at work. You are ' + p.age + ' with ' + money(G.cash) + ' in the bank.';
+      if (G.loan) intro += ' You owe ' + money(G.loan.bal) + ' in student loans.';
+      return '<section class="wire"><div class="eyebrow">Day one</div><div class="wire-head">' + intro + '</div>' +
+        '<div class="notes"><div class="note">You don’t know what year it is. Watch the rates, the prices and the news.</div></div></section>';
+    }
+    var rep = G.log[G.log.length - 1];
+    var head = NEWS[qKey(rep.q)];
+    if (!head) head = Math.abs(rep.d.sp) > 0.07 ? ('Stocks ' + (rep.d.sp > 0 ? 'rose' : 'fell') + ' ' + pct(Math.abs(rep.d.sp), 0) + ' this quarter. No other big news.') : 'A quiet quarter with no big news.';
+    var mv = ['<span>Prices <b class="' + (rep.d.cpi > 0.02 ? 'neg' : '') + '">' + spct(rep.d.cpi) + '</b></span>',
+      '<span>Stocks <b class="' + cls(rep.d.sp) + '">' + spct(rep.d.sp) + '</b></span>',
+      '<span>House <b class="' + cls(rep.d.house) + '">' + spct(rep.d.house) + '</b></span>'];
+    if (G.q >= E.GOLD_LEGAL) mv.push('<span>Gold <b class="' + cls(rep.d.gold) + '">' + spct(rep.d.gold) + '</b></span>');
+    var notes = rep.notes.map(function (n) { return '<div class="note ' + (n.kind === 'bad' ? 'neg' : n.kind === 'good' ? 'pos' : '') + '">' + n.text + '</div>'; });
+    notes.push('<div class="note">Your bank balance changed by <span class="num ' + cls(rep.flows.total) + '">' + signed(rep.flows.total) + '</span> this quarter.</div>');
+    return '<section class="wire"><div class="eyebrow">Teletype · what happened this quarter</div><div class="wire-head">' + head + '</div><div class="moves">' + mv.join('') + '</div><div class="notes">' + notes.join('') + '</div></section>';
+  }
+  function flows() {
+    var q = G.q, pay = E.pay(G), pas = E.passive(G);
+    var f = { sal: G.employed ? pay.net : E.benefit(G), exp: E.expenses(G), pas: pas };
+    f.loan = G.loan ? Math.min(G.loan.pay, G.loan.bal * (1 + E.LOAN_RATE / 400)) : 0;
+    f.card = G.cash < 0 ? G.cash * E.CARD_RATE / 400 : 0;
+    f.total = f.sal - f.exp + pas.total - f.loan + f.card;
+    return f;
+  }
+  function gauge(f) {
+    var need = f.exp + f.loan, fr = f.pas.total / need, w = Math.max(0, Math.min(1, Math.abs(fr))) * 100;
+    var h = '<section class="free"><div class="eyebrow">Freedom: the share of expenses your passive income covers</div><div class="free-row"><span class="free-pct ' + (fr < 0 ? 'neg' : '') + '">' + pct(fr, 0) + '</span>' +
+      '<span class="free-cap"><span class="num">' + money(f.pas.total) + '</span> passive income<br>of <span class="num">' + money(need) + '</span> expenses a quarter</span></div>' +
+      '<div class="bar" role="img" aria-label="Freedom ' + pct(fr, 0) + '"><i class="' + (fr < 0 ? 'neg-fill' : '') + '" style="width:' + w.toFixed(1) + '%"></i></div>';
+    if (G.streak > 0) h += '<div class="streak pos">Expenses covered ' + G.streak + ' of ' + E.WIN_STREAK + ' quarters in a row. Hold on.</div>';
+    return h + '</section>';
+  }
+  function ledger(f) {
+    var h = '<section class="block"><h2>This quarter, if you change nothing</h2><div class="rows">';
+    h += row(G.employed ? 'Take-home pay' : 'Unemployment benefit', signed(f.sal), 'pos');
+    h += row('Living expenses', signed(-f.exp), 'neg');
+    if (f.loan) h += row('Student loan payment', signed(-f.loan), 'neg');
+    if (f.card) h += row('Credit card interest', signed(f.card), 'neg');
+    if (G.cash > 0) h += row('Bank interest', signed(f.pas.interest), cls(f.pas.interest), 'passive');
+    if (G.units > 0) h += row('Dividends', signed(f.pas.div), 'pos', 'passive');
+    if (G.houses.length) h += row('Rent minus mortgage', signed(f.pas.rent), cls(f.pas.rent), 'passive');
+    h += '<div class="row sum"><span>Left over</span><span class="dots"></span><span class="num ' + cls(f.total) + '">' + signed(f.total) + '</span></div>';
+    return h + '</div></section>';
+  }
+  function economy() {
+    var q = G.q;
+    return '<section class="block"><h2>The economy now</h2><div class="eco">' +
+      '<div><b>' + rate(D.infl[q]) + '</b><span>inflation, year over year</span></div>' +
+      '<div><b>' + rate(D.un[q]) + '</b><span>unemployment</span></div>' +
+      '<div><b>' + rate(D.tb[q]) + '</b><span>bank rate</span></div>' +
+      '<div><b>' + rate(D.mort[q]) + '</b><span>mortgage</span></div></div></section>';
+  }
+  function chips(label, act, base, enabled) {
+    var h = '<div class="acts"><span>' + label + '</span>';
+    [[0.25, '¼'], [0.5, '½'], [1, 'all']].forEach(function (x) {
+      var v = base * x[0];
+      h += '<button class="chip" data-a="' + act + '" data-f="' + x[0] + '"' + (enabled && v >= 1 ? '' : ' disabled') + '>' + x[1] + (enabled && v >= 1 ? ' · ' + money(v) : '') + '</button>';
+    });
+    return h + '</div>';
+  }
+  function hist(arr) { return arr.slice(G.start, G.q + 1); }
+  function chg(arr) { return G.q > G.start ? ' · this quarter <b class="' + cls(arr[G.q] / arr[G.q - 1] - 1) + '">' + spct(arr[G.q] / arr[G.q - 1] - 1) + '</b>' : ''; }
+  function assets() {
+    var q = G.q, cash = G.cash, h = '<section class="block"><h2>Where to put your money</h2>';
+    // bank
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">Bank account</div><div class="asset-price"><b>' + rate(D.tb[q], 2) + '</b> a year</div></div>' + spark(hist(D.tb)) + '</div>';
+    if (cash >= 0) h += '<div class="own">In the bank: <b class="num">' + money(cash) + '</b>. Anything you don’t invest sits here and earns interest.</div>';
+    else h += '<div class="own neg">Your account is empty and you are living on your credit card: <b class="num">' + money(-cash) + '</b> at ' + rate(E.CARD_RATE, 0) + ' a year.</div>';
+    h += '</div>';
+    // stocks
+    var sv = G.units * D.sp[q];
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">Stocks</div><div class="asset-price">index <b>' + D.sp[q].toFixed(2) + '</b>' + chg(D.sp) + ' · dividend yield ' + rate(D.div[q] / D.sp[q] * 100) + '</div></div>' + spark(hist(D.sp)) + '</div>';
+    h += sv > 0.5 ? '<div class="own">You hold <b class="num">' + money(sv) + '</b> in stocks (invested ' + money(G.cost.units) + ', <span class="' + cls(sv - G.cost.units) + '">' + spct(sv / G.cost.units - 1, 0) + '</span>).</div>' : '<div class="own muted">No stocks. A basket of large companies that follows the S&amp;P 500. The broker charges ' + rate(E.stockFee(q) * 100) + ' when you buy and again when you sell.</div>';
+    h += chips('Buy', 'buyS', Math.max(0, cash), cash >= 1);
+    if (sv > 0.5) h += chips('Sell', 'sellS', sv, true);
+    h += '</div>';
+    // gold
+    var gv = G.oz * D.gold[q];
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">Gold</div><div class="asset-price"><b>' + money(D.gold[q]) + '</b> an ounce' + chg(D.gold) + '</div></div>' + spark(hist(D.gold)) + '</div>';
+    if (!E.goldOpen(G)) h += '<div class="locked">You can’t buy it: private citizens in the US are banned from owning gold bullion. The ban has stood since 1933.</div>';
+    else {
+      h += gv > 0.5 ? '<div class="own">You hold <b class="num">' + money(gv) + '</b> in gold (invested ' + money(G.cost.oz) + ', <span class="' + cls(gv - G.cost.oz) + '">' + spct(gv / G.cost.oz - 1, 0) + '</span>). It pays no income.</div>' : '<div class="own muted">No gold. It pays no income, and the dealer markup on purchase is 2%.</div>';
+      h += chips('Buy', 'buyG', Math.max(0, cash), cash >= 1);
+      if (gv > 0.5) h += chips('Sell', 'sellG', gv, true);
+    }
+    h += '</div>';
+    // house
+    var k = E.houseQuote(G);
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">Rental house</div><div class="asset-price"><b>' + money(k.price) + '</b>' + chg(D.house) + ' · mortgage ' + rate(k.rate, 2) + '</div></div>' + spark(hist(D.house)) + '</div><div class="rows">' +
+      row(Math.round(E.DOWN * 100) + '% down plus closing costs', money(k.need)) + row('30-year mortgage payment', signed(-k.pay) + ' /qtr', 'neg') + row('Rent after taxes and repairs', signed(k.rent * E.RENT_KEEP) + ' /qtr', 'pos') +
+      '<div class="row sum"><span>Net cash flow from the house</span><span class="dots"></span><span class="num ' + cls(k.net) + '">' + signed(k.net) + ' /qtr</span></div></div>' +
+      '<div class="acts"><button class="btn" data-a="buyH"' + (k.ok ? '' : ' disabled') + '>Buy a house for ' + money(k.need) + '</button></div>' + (k.why ? '<div class="why">' + WHY[k.why] + '</div>' : '');
+    G.houses.forEach(function (hh, i) {
+      var net = E.houseNet(hh, q), sale = E.houseSale(G, i), rf = E.refiQuote(G, i);
+      h += '<div class="house"><div class="own"><b>Your house ' + (i + 1) + '</b>, bought in year ' + (Math.floor((hh.bought - G.start) / 4) + 1) + ' for ' + money(hh.price) + '</div><div class="rows">' +
+        row('Owed to the bank at ' + rate(hh.rate, 2), money(hh.bal)) + row('Rent minus mortgage', signed(net) + ' /qtr', cls(net)) + '</div><div class="acts">' +
+        '<button class="chip" data-a="sellH" data-i="' + i + '">Sell · ' + (sale >= 0 ? 'you get ' + money(sale) : 'you pay ' + money(-sale)) + '</button>';
+      if (rf.offered) h += '<button class="chip" data-a="refi" data-i="' + i + '"' + (rf.ok ? '' : ' disabled') + '>Refinance at ' + rate(rf.rate, 2) + ' · costs ' + money(rf.fee) + ', payment −' + money(rf.saves) + '</button>';
+      h += '</div></div>';
+    });
+    h += '</div></section>';
+    if (G.loan) {
+      h += '<section class="block"><h2>Debts</h2><div class="asset"><div class="own">Student loan: <b class="num">' + money(G.loan.bal) + '</b> left at ' + E.LOAN_RATE + '% a year, payment ' + money(G.loan.pay) + ' a quarter.</div>' +
+        chips('Pay off', 'payL', Math.max(0, Math.min(cash, G.loan.bal)), cash >= 1) + '</div></section>';
+    }
+    return h;
+  }
+  function viewPlay() {
+    var f = flows();
+    return header() + wire() + gauge(f) + ledger(f) + economy() + assets() +
+      '<div class="dock"><div class="dock-in">' + (dirty ? '<button class="btn ghost" data-a="undo">Undo trades</button>' : '') +
+      '<button class="btn" data-a="next">' + (G.t === E.LEN - 1 ? 'Live the last quarter' : 'Live the quarter') + ' →</button></div></div>';
+  }
+
+  /* ---------- results ---------- */
+  function chart() {
+    var H = G.hist, n = H.length - 1, W = 560, HT = 280, L = 92, R = 18, T = 14, B = 36;
+    var vals = [0]; H.forEach(function (h) { vals.push(h.nw, h.real); });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals); if (mx - mn < 1) mx = mn + 1;
+    var raw = (mx - mn) / 4, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), nm = raw / mag, stepv = (nm < 1.5 ? 1 : nm < 3 ? 2 : nm < 7 ? 5 : 10) * mag;
+    var lo = Math.floor(mn / stepv) * stepv, hi = Math.ceil(mx / stepv) * stepv;
+    function X(t) { return L + (n ? t / n : 0) * (W - L - R); }
+    function Y(v) { return T + (hi - v) / (hi - lo) * (HT - T - B); }
+    var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + HT + '" role="img" aria-label="Net worth by quarter">';
+    for (var v = lo; v <= hi + stepv / 2; v += stepv) s += '<line class="' + (Math.abs(v) < stepv / 10 ? 'zero' : 'grid') + '" x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '"/><text x="' + (L - 8) + '" y="' + (Y(v) + 5).toFixed(1) + '" text-anchor="end">' + short(v) + '</text>';
+    for (var t = 0; t <= n; t++) { var l = E.label(G.start + t); if (l.k === 1 && l.y % 3 === 0 && X(t) < W - 30) s += '<line class="grid" x1="' + X(t).toFixed(1) + '" x2="' + X(t).toFixed(1) + '" y1="' + (HT - B) + '" y2="' + (HT - B + 6) + '"/><text x="' + X(t).toFixed(1) + '" y="' + (HT - 10) + '" text-anchor="middle">' + l.y + '</text>'; }
+    var pr = H.map(function (h, i) { return X(i).toFixed(1) + ' ' + Y(h.real).toFixed(1); }), pn = H.map(function (h, i) { return X(i).toFixed(1) + ' ' + Y(h.nw).toFixed(1); });
+    s += '<path class="real-a" d="M' + pr.join('L') + 'L' + X(n).toFixed(1) + ' ' + Y(0).toFixed(1) + 'L' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1) + 'Z"/><path class="nom" d="M' + pn.join('L') + '"/><path class="real" d="M' + pr.join('L') + '"/><circle class="dot" r="4" cx="' + X(n).toFixed(1) + '" cy="' + Y(H[n].real).toFixed(1) + '"/>';
+    return s + '</svg>';
+  }
+  function viewEnd() {
+    var p = E.prof(G.prof), last = G.hist[G.hist.length - 1], a = E.label(G.start), b = E.label(G.q), yrs = G.t / 4;
+    var title = G.bankrupt ? 'Bankrupt' : G.won ? 'You got off the treadmill' : last.free >= 0.75 ? 'Almost free' : last.free >= 0.5 ? 'Halfway there' : last.free >= 0.25 ? 'Still on the treadmill' : 'Stuck on the treadmill';
+    var dur = (yrs % 1 === 0 ? yrs : yrs.toFixed(2).replace(/0$/, '')) + ' ' + (yrs === 1 ? 'year' : 'years');
+    var h = '<section class="verdict"><div class="eyebrow">Result · ' + p.name + ' · ' + dur + '</div><h1>' + title + '</h1>' +
+      '<div class="reveal">Those were the years ' + a.y + '–' + b.y + '. You started in ' + ROMAN[a.k - 1] + ' ' + a.y + '.</div>' +
+      '<p>' + (G.won ? 'Passive income covered your expenses four quarters in a row, in the ' + ordinal(Math.ceil(G.wonAt / 4)) + ' year of your career. ' : 'Passive income covers ' + pct(last.free, 0) + ' of your expenses. ') +
+      'Net worth: ' + money(last.nw) + '. In first-year dollars that is ' + money(last.real) + ': prices went up ' + (D.cpi[G.q] / D.cpi[G.start]).toFixed(1) + ' times over these years.</p></section>';
+    h += '<section class="block"><h2>Your net worth by quarter</h2><div class="legend"><span><i></i>in first-year dollars</span><span><i class="n"></i>on paper</span></div>' + chart() + '</section>';
+    // compare with simple strategies
+    h += '<section class="block"><h2>Same years, same career, same luck</h2><div class="tbl-wrap"><table><thead><tr><th>Strategy</th><th class="num">Freedom</th><th class="num">Net worth, start-year $</th></tr></thead><tbody>' +
+      '<tr class="me"><td>You</td><td class="num">' + pct(last.free, 0) + '</td><td class="num">' + money(last.real) + '</td></tr>';
+    Object.keys(E.BOTS).forEach(function (id) {
+      var s = E.runBot(G.prof, G.seed, G.start, E.BOTS[id]), x = s.hist[Math.min(G.t, s.hist.length - 1)];
+      h += '<tr><td>' + E.BOTS[id].name + (s.bankrupt && s.hist.length - 1 <= G.t ? ' (bankrupt)' : '') + '</td><td class="num">' + pct(x.free, 0) + '</td><td class="num">' + money(x.real) + '</td></tr>';
+    });
+    h += '</tbody></table></div></section>';
+    // what happened to the assets
+    var s0 = G.start, s1 = G.q, infl = D.cpi[s1] / D.cpi[s0], dep = 1, tr = 1;
+    for (var q = s0; q < s1; q++) { dep *= 1 + D.tb[q] / 400; tr *= (D.sp[q + 1] + D.div[q] / 4) / D.sp[q]; }
+    var rows = [['Bank account with interest', dep], ['Stocks with dividends', tr], ['House (price, no rent)', D.house[s1] / D.house[s0]], ['Gold', D.gold[s1] / D.gold[s0]]];
+    h += '<section class="block"><h2>What became of one dollar over these years</h2><div class="tbl-wrap"><table><thead><tr><th>Investment</th><th class="num">On paper</th><th class="num">After inflation</th></tr></thead><tbody>';
+    rows.forEach(function (r) { h += '<tr><td>' + r[0] + '</td><td class="num">' + '$' + r[1].toFixed(2) + '</td><td class="num ' + (r[1] / infl < 1 ? 'neg' : 'pos') + '">$' + (r[1] / infl).toFixed(2) + '</td></tr>'; });
+    h += '</tbody></table></div><div class="hint">To buy what $1 bought at the start, you needed $' + infl.toFixed(2) + ' at the end.</div></section>';
+    // the timeline with years
+    h += '<section class="block"><h2>Timeline: what that news was</h2><div class="timeline">';
+    G.log.forEach(function (rep) { var n = NEWS[qKey(rep.q)]; if (n) { var l = E.label(rep.q); h += '<div><b>' + l.y + ' · ' + ROMAN[l.k - 1] + '</b><span>' + n + '</span></div>'; } });
+    h += '</div></section>' + sources() + '<div class="dock"><div class="dock-in"><button class="btn" data-a="again">Play again</button></div></div>';
+    return h;
+  }
+
+  function render() {
+    app.innerHTML = screen === 'play' && G ? viewPlay() : screen === 'end' && G ? viewEnd() : viewStart();
+    save();
+  }
+
+  app.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-a]'); if (!b || b.disabled) return;
+    var a = b.dataset.a, f = parseFloat(b.dataset.f), i = parseInt(b.dataset.i, 10), done = false, top = false;
+    if (a !== 'quit') askQuit = false;
+    if (a === 'pick') { G = E.newGame(b.dataset.id, offer.seed, offer.start); screen = 'play'; markTurn(); top = true; }
+    else if (a === 'resume') { screen = 'play'; markTurn(); top = true; }
+    else if (a === 'again') { G = null; newOffer(); screen = 'start'; top = true; }
+    else if (a === 'quit') { if (askQuit) { askQuit = false; G = null; newOffer(); screen = 'start'; top = true; } else askQuit = true; }
+    else if (a === 'undo') { G = JSON.parse(turnStart); dirty = false; }
+    else if (a === 'next') { E.step(G); if (G.won || G.over) screen = 'end'; markTurn(); top = true; }
+    else if (a === 'buyS') done = E.buyStock(G, G.cash * f);
+    else if (a === 'sellS') done = E.sellStock(G, f);
+    else if (a === 'buyG') done = E.buyGold(G, G.cash * f);
+    else if (a === 'sellG') done = E.sellGold(G, f);
+    else if (a === 'buyH') done = E.buyHouse(G);
+    else if (a === 'sellH') done = E.sellHouse(G, i);
+    else if (a === 'refi') done = E.refinance(G, i);
+    else if (a === 'payL') done = E.payLoan(G, Math.min(G.cash, G.loan.bal) * f);
+    if (done) dirty = true;
+    render();
+    if (top) window.scrollTo(0, 0);
+  });
+
+  function boot(data) {
+    if (data && data.offer) { G = data.G; screen = data.screen; offer = data.offer; } else load();
+    if (!offer) newOffer();
+    if (!G && screen !== 'start') screen = 'start';
+    if (G && screen === 'play') markTurn();
+    render();
+  }
+  var hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(function () { return { G: G, screen: screen, offer: offer }; });
+  if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>
