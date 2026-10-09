@@ -82,7 +82,13 @@
         'Pay: graduate starting salaries (MHLW wage structure survey; 1980–88 partly estimated), bonus months (National Personnel Authority), taxes (Ministry of Finance), social insurance and unemployment benefit (MHLW).',
         'Estimates, not measured: dividend yields, rent at 5.5% of the price at the start, owner’s costs, purchase and sale costs, consumer-loan rate (25%), pay of nurses, construction workers and doctors, layoff risk by career, cost of children.'
       ],
-      langLabel: 'Language'
+      langLabel: 'Language',
+      guessH: 'Before the reveal: what year did you start?', skip: 'Skip',
+      guessExact: 'You guessed the year exactly.', guessOff: function (g, d) { return 'Your guess, ' + g + ', was ' + d + (d === 1 ? ' year' : ' years') + ' off.'; },
+      shareBtn: 'Share your result', copied: 'Copied. Paste it anywhere.', copyThis: 'Copy this: ',
+      shareText: function (p, a, b, res, g) { return 'In Someone Else\u2019s Shoes: Japan. I lived ' + a + '\u2013' + b + ' as ' + (/^[AEIOU]/.test(p) ? 'an ' : 'a ') + p.toLowerCase() + ' and ' + res + '.' + g + ' Can you do better?'; },
+      shareBankrupt: 'went bankrupt', shareWon: function (y) { return 'saved 10 years of living costs by year ' + y; }, shareCover: function (x) { return 'saved ' + x + ' of living costs'; },
+      shareExact: ' Guessed the year exactly!', shareOff: function (d) { return ' My guess was ' + d + (d === 1 ? ' year' : ' years') + ' off.'; }
     },
     ja: {
       title: '他人の靴をはいて', sub: '日本編',
@@ -155,7 +161,13 @@
         '給料：大卒初任給（厚生労働省 賃金構造基本統計調査、1980〜88年は一部推計）、ボーナス月数（人事院）、税（財務省）、社会保険料と失業手当（厚生労働省）。',
         '推計値（実測ではない）：配当利回り、初期の家賃（価格の5.5％）、オーナーの経費、売買の諸費用、借金の金利（25％）、看護師・建設作業員・医師の給料、職業別の失業リスク、子どもの費用。'
       ],
-      langLabel: '言語'
+      langLabel: '言語',
+      guessH: '答え合わせの前に：スタートは何年だったと思いますか？', skip: 'スキップ',
+      guessExact: '開始年をぴったり当てました。', guessOff: function (g, d) { return 'あなたの予想は' + g + '年、' + d + '年ずれていました。'; },
+      shareBtn: '結果をシェアする', copied: 'コピーしました。好きな場所に貼り付けてください。', copyThis: 'これをコピー：',
+      shareText: function (p, a, b, res, g) { return '「他人の靴をはいて ― 日本編」で' + a + '〜' + b + '年を' + p + 'として生き、' + res + '。' + g + 'あなたは？'; },
+      shareBankrupt: '自己破産しました', shareWon: function (y) { return y + '年目に生活費10年分の資産を達成'; }, shareCover: function (x) { return '資産は生活費' + x + 'に'; },
+      shareExact: '開始年はぴったり当てた！', shareOff: function (d) { return '開始年の予想は' + d + '年ずれた。'; }
     }
   };
   var PROF = {
@@ -432,9 +444,17 @@
     var title = G.bankrupt ? t.verdict.bankrupt : G.won ? t.verdict.won : last.free >= 0.75 ? t.verdict.almost : last.free >= 0.5 ? t.verdict.half : last.free >= 0.2 ? t.verdict.some : t.verdict.none;
     var dur = lang === 'ja' ? (yrs % 1 === 0 ? yrs : yrs.toFixed(2)) + '年' : (yrs % 1 === 0 ? yrs : yrs.toFixed(2)) + (yrs === 1 ? ' year' : ' years');
     var k = (D.cpi[G.q] / D.cpi[G.start]).toFixed(2);
-    var h = '<section class="verdict"><div class="hero-top"><div class="eyebrow">' + t.result + ' · ' + profName(G.prof) + ' · ' + dur + '</div>' + langToggle() + '</div><h1>' + title + '</h1>' +
-      '<div class="reveal">' + t.reveal(a.y, b.y, t.qname[a.k - 1], a.y) + '</div>' +
-      '<p>' + (G.won ? t.wonText(Math.ceil(G.wonAt / 4)) : t.notWon(t.years(cover))) + t.nwText(money(last.nw), money(last.real), k) + '</p></section>';
+    var head = '<section class="verdict"><div class="hero-top"><div class="eyebrow">' + t.result + ' · ' + profName(G.prof) + ' · ' + dur + '</div>' + langToggle() + '</div><h1>' + title + '</h1>';
+    if (G.guess == null) {   // before the reveal: let the player guess the start year
+      var ys = '';
+      for (var y = E.label(0).y; y <= E.label(E.MAX_START).y; y++) ys += '<button class="chip" data-a="guess" data-y="' + y + '">' + y + '</button>';
+      return head + '</section><section class="block"><h2>' + t.guessH + '</h2><div class="acts">' + ys + '<button class="chip" data-a="guess" data-y="0">' + t.skip + '</button></div></section>';
+    }
+    var off = Math.abs(G.guess - a.y), guessLine = G.guess ? (off === 0 ? t.guessExact : t.guessOff(G.guess, off)) : '';
+    var h = head +
+      '<div class="reveal">' + t.reveal(a.y, b.y, t.qname[a.k - 1], a.y) + (guessLine ? ' ' + guessLine : '') + '</div>' +
+      '<p>' + (G.won ? t.wonText(Math.ceil(G.wonAt / 4)) : t.notWon(t.years(cover))) + t.nwText(money(last.nw), money(last.real), k) + '</p>' +
+      '<div class="acts"><button class="btn" data-a="share">' + t.shareBtn + '</button><span class="hint" id="share-status" role="status"></span></div></section>';
     h += '<section class="block"><h2>' + t.chartH + '</h2><div class="legend"><span><i></i>' + t.legReal + '</span><span><i class="n"></i>' + t.legNom + '</span></div>' + chart() + '</section>';
     h += '<section class="block"><h2>' + t.cmpH + '</h2><div class="tbl-wrap"><table><thead><tr><th>' + t.strat + '</th><th class="num">' + t.safety + '</th><th class="num">' + t.nwStart + '</th></tr></thead><tbody>' +
       '<tr class="me"><td>' + t.you + '</td><td class="num">' + t.years(cover) + '</td><td class="num">' + money(last.real) + '</td></tr>';
@@ -455,6 +475,34 @@
     return h;
   }
 
+  /* ---------- sharing and visit counting ---------- */
+  var URL_PLAY = 'https://malikabyl.github.io/in-someone-elses-shoes/japan/';
+  function shareText() {
+    var t = L(), last = G.hist[G.hist.length - 1], a = E.label(G.start), b = E.label(G.q), off = Math.abs(G.guess - a.y);
+    var res = G.bankrupt ? t.shareBankrupt : G.won ? t.shareWon(Math.ceil(G.wonAt / 4)) : t.shareCover(t.years(last.free * E.GOAL_YEARS));
+    var g = G.guess ? (off === 0 ? t.shareExact : t.shareOff(off)) : '';
+    return t.shareText(profName(G.prof), a.y, b.y, res, g);
+  }
+  function share() {
+    var t = L(), text = shareText(), status = document.getElementById('share-status');
+    function say(m) { if (status) status.textContent = m; }
+    function copy() {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + ' ' + URL_PLAY).then(function () { say(t.copied); }, function () { say(t.copyThis + text + ' ' + URL_PLAY); });
+      else say(t.copyThis + text + ' ' + URL_PLAY);
+    }
+    track('share');
+    if (navigator.share) { navigator.share({ title: t.title + ' \u00b7 ' + t.sub, text: text, url: URL_PLAY }).catch(function (e) { if (e && e.name !== 'AbortError') copy(); }); return; }
+    copy();
+  }
+  /* GoatCounter: counts visits and a few events, without cookies. Runs only on the public site. */
+  var GC = 'https://malikabyl-shoes.goatcounter.com/count';
+  function track(name) {
+    try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'jp/' + name, title: name, event: true }); } catch (e) { /* counting is optional */ }
+  }
+  if (/\.github\.io$/.test(location.hostname)) {
+    var gc = document.createElement('script'); gc.async = true; gc.src = 'https://gc.zgo.at/count.js'; gc.setAttribute('data-goatcounter', GC); document.head.appendChild(gc);
+  }
+
   function render() {
     document.documentElement.lang = lang;
     document.title = T[lang].title + ' · ' + T[lang].sub;
@@ -466,13 +514,15 @@
     var b = ev.target.closest('[data-a]'); if (!b || b.disabled) return;
     var a = b.dataset.a, f = parseFloat(b.dataset.f), i = parseInt(b.dataset.i, 10), done = false, top = false;
     if (a !== 'quit') askQuit = false;
-    if (a === 'lang') { lang = b.dataset.l; try { localStorage.setItem(LANGKEY, lang); } catch (e) { /* language just won't be remembered */ } }
-    else if (a === 'pick') { G = E.newGame(b.dataset.id, offer.seed, offer.start); screen = 'play'; markTurn(); top = true; }
+    if (a === 'lang') { lang = b.dataset.l; track('lang-' + lang); try { localStorage.setItem(LANGKEY, lang); } catch (e) { /* language just won't be remembered */ } }
+    else if (a === 'guess') { G.guess = parseInt(b.dataset.y, 10) || 0; track('guess'); top = true; }
+    else if (a === 'share') { share(); return; }
+    else if (a === 'pick') { G = E.newGame(b.dataset.id, offer.seed, offer.start); screen = 'play'; markTurn(); top = true; track('start-' + b.dataset.id); }
     else if (a === 'resume') { screen = 'play'; markTurn(); top = true; }
     else if (a === 'again') { G = null; newOffer(); screen = 'start'; top = true; }
     else if (a === 'quit') { if (askQuit) { askQuit = false; G = null; newOffer(); screen = 'start'; top = true; } else askQuit = true; }
     else if (a === 'undo') { G = JSON.parse(turnStart); dirty = false; }
-    else if (a === 'next') { E.step(G); if (G.won || G.over) screen = 'end'; markTurn(); top = true; }
+    else if (a === 'next') { E.step(G); if (G.won || G.over) { screen = 'end'; track(G.won ? 'end-won' : 'end'); } markTurn(); top = true; }
     else if (a === 'buyS') done = E.buyStock(G, G.cash * f);
     else if (a === 'sellS') done = E.sellStock(G, f);
     else if (a === 'buyG') done = E.buyGold(G, G.cash * f);

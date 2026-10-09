@@ -110,3 +110,9 @@ All quarterly values are the first month of the quarter, 1980Q1–2005Q4. See `d
 ## News
 
 One headline for each of the 104 quarters, in English and Japanese, without years or names. Sources and checks are in [research/news-1980-2005-ru.md](research/news-1980-2005-ru.md) (Russian). Ten headlines are not about the economy (elections, disasters, a game console) and could be replaced.
+
+## Sharing and visit counting
+
+At the end the game asks you to guess the start year before revealing it, then offers a **Share your result** button: the phone's share menu, or a copied text with the link.
+
+On the public site (github.io only) the game loads [GoatCounter](https://www.goatcounter.com/), which counts visits and a few events (game started, game finished, guess, share, language) without cookies or personal data. The count goes to `malikabyl-shoes.goatcounter.com`.

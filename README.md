@@ -8,10 +8,6 @@ Status: playable prototype, version 1. English edition of the Russian game «К�
 
 Online: https://malikabyl.github.io/in-someone-elses-shoes/
 
-## Japan edition
-
-A second edition on Japanese data, 1980–2005, in English and Japanese: https://malikabyl.github.io/in-someone-elses-shoes/japan/ — see [japan/README.md](japan/README.md).
-
 ## Running it
 
 The whole game is one file, `index.html`, with data, engine and interface inside it. No build step and no server: open the file in a browser. Fonts load from Google Fonts; offline, the game falls back to system fonts. Your game is saved in the browser and survives a page reload.
@@ -240,3 +236,9 @@ The script reads the engine and data straight from `index.html` and plays 200 ga
 ## License
 
 Code: MIT, see [LICENSE](LICENSE). Data: US government statistics (BLS, Census, Federal Reserve, Freddie Mac via FRED) are in the public domain; stock and dividend series come from Robert Shiller's published data.
+
+## Sharing and visit counting
+
+At the end the game asks you to guess the start year before revealing it, then offers a **Share your result** button: the phone's share menu, or a copied text with the link.
+
+On the public site (github.io only) the game loads [GoatCounter](https://www.goatcounter.com/), which counts visits and a few events (game started, game finished, guess, share, language) without cookies or personal data. The count goes to `malikabyl-shoes.goatcounter.com`.
