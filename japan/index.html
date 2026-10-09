@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>In Someone Else's Shoes: Japan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;700&display=swap">
+<style>
+/* One passbook column: ledger paper, dotted leader rows, a teletype tape for the news. */
+:root {
+  --paper: #E9EFE4;
+  --card: #F6F9F2;
+  --ink: #15231B;
+  --muted: #586A5E;
+  --line: #C6D2C3;
+  --accent: #1D6846;
+  --on-accent: #F6F9F2;
+  --pos: #1D6846;
+  --neg: #AE3A2B;
+  --gold: #8F6511;
+  --tape: #DCE5D6;
+  --font-display: 'IBM Plex Serif', 'Noto Serif JP', Georgia, 'Times New Roman', serif;
+  --font-body: 'IBM Plex Sans', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-data: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1512; --card: #151E19; --ink: #DCE6DD; --muted: #8FA396; --line: #27352D;
+    --accent: #5FC08F; --on-accent: #0B1510; --pos: #5FC08F; --neg: #F0806E; --gold: #DDAF55; --tape: #1B2620;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1512; --card: #151E19; --ink: #DCE6DD; --muted: #8FA396; --line: #27352D;
+  --accent: #5FC08F; --on-accent: #0B1510; --pos: #5FC08F; --neg: #F0806E; --gold: #DDAF55; --tape: #1B2620;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+#app { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 120px; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3, p { margin: 0; }
+button { font: inherit; color: inherit; }
+button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.pos { color: var(--pos); } .neg { color: var(--neg); } .muted { color: var(--muted); }
+.eyebrow { font-family: var(--font-data); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- header ---------- */
+.top { display: flex; flex-direction: column; gap: 10px; }
+.top-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -.01em; }
+.when { font-family: var(--font-data); font-size: 13px; }
+.who { color: var(--muted); font-size: 13px; }
+.years { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; }
+.year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; height: 8px; }
+.tick { background: var(--line); }
+.tick.done { background: var(--ink); }
+.tick.now { background: var(--accent); }
+
+/* ---------- teletype ---------- */
+.wire { background: var(--tape); border-left: 3px solid var(--ink); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.wire-head { font-family: var(--font-display); font-size: 18px; line-height: 1.3; font-weight: 500; text-wrap: pretty; }
+.moves { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--font-data); font-size: 12.5px; }
+.notes { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.note::before { content: '— '; color: var(--muted); }
+
+/* ---------- freedom gauge ---------- */
+.free { display: flex; flex-direction: column; gap: 8px; }
+.free-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.free-pct { font-family: var(--font-data); font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -.02em; }
+.free-cap { font-size: 13px; color: var(--muted); text-align: right; min-width: 0; }
+.bar { height: 14px; background: var(--card); border: 1px solid var(--ink); position: relative; }
+.bar > i { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.bar > i.neg-fill { background: var(--neg); }
+.streak { font-size: 13px; }
+
+/* ---------- ledger rows ---------- */
+.block { display: flex; flex-direction: column; gap: 8px; }
+.block > h2 { font-family: var(--font-data); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--ink); }
+.rows { display: flex; flex-direction: column; gap: 5px; }
+.row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.row > span:first-child { min-width: 0; }
+.row > .dots { flex: 1 1 12px; border-bottom: 1px dotted var(--muted); transform: translateY(-4px); min-width: 12px; opacity: .6; }
+.row > .num { white-space: nowrap; }
+.row.sum { padding-top: 6px; border-top: 1px solid var(--line); font-weight: 600; }
+.tag { font-family: var(--font-data); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 0 4px; margin-left: 6px; white-space: nowrap; }
+
+.eco { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.eco div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.eco b { font-family: var(--font-data); font-weight: 600; font-size: 17px; }
+.eco span { font-size: 11.5px; color: var(--muted); line-height: 1.2; }
+@media (max-width: 380px) { .eco { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- assets ---------- */
+.asset { background: var(--card); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.asset-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.asset-head > div { min-width: 0; }
+.asset-name { font-weight: 600; font-size: 16px; }
+.asset-price { font-family: var(--font-data); font-size: 13px; color: var(--muted); }
+.asset-price b { color: var(--ink); font-weight: 600; }
+.spark { flex: 0 0 96px; width: 96px; height: 32px; }
+.spark path.l { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.spark path.a { fill: var(--ink); opacity: .08; stroke: none; }
+.spark circle { fill: var(--accent); }
+.own { font-size: 14px; }
+.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.acts > span { font-size: 12px; color: var(--muted); flex: 0 0 62px; }
+.chip { font-family: var(--font-data); font-size: 13px; background: var(--paper); border: 1px solid var(--ink); padding: 7px 10px; min-height: 36px; cursor: pointer; white-space: nowrap; }
+.chip:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.chip:disabled { border-color: var(--line); color: var(--muted); cursor: default; }
+.btn { font-weight: 600; background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); padding: 10px 14px; min-height: 42px; cursor: pointer; }
+.btn:disabled { background: transparent; color: var(--muted); border-color: var(--line); cursor: default; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--ink); font-weight: 500; }
+.why { font-size: 13px; color: var(--neg); }
+.hint { font-size: 13px; color: var(--muted); }
+.house { border-top: 1px dotted var(--muted); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.locked { font-size: 14px; color: var(--muted); }
+
+/* ---------- bottom dock ---------- */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; background: var(--paper); border-top: 1px solid var(--ink); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5; }
+.dock-in { max-width: 528px; margin: 0 auto; display: flex; gap: 8px; }
+.dock .btn { flex: 1 1 auto; font-size: 16px; min-height: 48px; }
+.dock .btn.ghost { flex: 0 0 auto; font-size: 14px; }
+
+/* ---------- start ---------- */
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: 44px; line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+.hero p { max-width: 60ch; }
+.hero { display: flex; flex-direction: column; gap: 12px; }
+.rules { display: flex; flex-direction: column; gap: 6px; padding-left: 18px; margin: 0; }
+.profs { display: flex; flex-direction: column; }
+.prof { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: 12px 4px; cursor: pointer; width: 100%; }
+.prof:hover { background: var(--card); }
+.prof-name { font-weight: 600; font-size: 16px; }
+.prof-pay { font-family: var(--font-data); font-size: 14px; text-align: right; white-space: nowrap; }
+.prof-note { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.prof-meta { grid-column: 1 / -1; font-family: var(--font-data); font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; }
+details { font-size: 13.5px; color: var(--muted); }
+details summary { cursor: pointer; color: var(--ink); font-weight: 500; padding-block: 6px; }
+details ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+
+/* ---------- results ---------- */
+.verdict h1 { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -.02em; text-wrap: balance; }
+.verdict { display: flex; flex-direction: column; gap: 10px; }
+.reveal { font-family: var(--font-data); font-size: 13px; letter-spacing: .04em; }
+.chart { width: 100%; height: auto; display: block; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .zero { stroke: var(--muted); stroke-width: 1; }
+.chart text { fill: var(--muted); font-family: var(--font-data); font-size: 16px; }
+.chart .real { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.chart .real-a { fill: var(--accent); opacity: .12; stroke: none; }
+.chart .nom { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .dot { fill: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid var(--accent); vertical-align: middle; margin-right: 6px; }
+.legend i.n { border-top: 1.5px dashed var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 8px 7px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+th { font-family: var(--font-data); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom-color: var(--ink); }
+td.num, th.num { text-align: right; padding-right: 0; padding-left: 8px; white-space: nowrap; }
+tr.me td { font-weight: 600; }
+.timeline { display: flex; flex-direction: column; gap: 8px; }
+.timeline div { display: grid; grid-template-columns: 74px 1fr; gap: 8px; font-size: 14px; }
+.timeline b { font-family: var(--font-data); font-weight: 500; font-size: 12.5px; color: var(--muted); padding-top: 2px; }
+@media (prefers-reduced-motion: no-preference) { .bar > i { transition: width .35s ease; } }
+body { margin: 0; }
+.lang { display: inline-flex; border: 1px solid var(--ink); }
+.lang button { font-family: var(--font-data); font-size: 12px; background: transparent; border: 0; padding: 4px 8px; min-height: 30px; cursor: pointer; color: var(--ink); }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+:root[lang="ja"] .eyebrow, :root[lang="ja"] .block > h2, :root[lang="ja"] th { letter-spacing: .04em; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>var DATA = {"y0":1980,"q0":1,"cpi":[71.57037,73.91193,74.93001,76.1517,76.86434,77.57699,78.18784,79.30771,79.30771,79.91856,79.71494,81.75108,81.03843,81.54747,81.54747,82.97276,82.56554,83.38,83.58361,84.70348,84.70348,85.31433,85.61975,86.3324,86.02698,86.12878,85.72156,86.02698,85.11072,86.23059,85.82336,86.63783,85.82336,86.4342,86.23059,87.55408,86.84144,88.47035,88.77577,90.09926,89.69203,90.91372,90.81191,92.84805,93.25528,93.96793,93.96793,95.39323,94.88419,96.30949,95.49503,96.30949,96.10588,97.12395,97.32757,97.63299,97.22575,97.93841,97.12395,98.34563,97.8366,97.73479,97.32757,97.73479,97.32757,97.93841,97.73479,98.24383,97.93841,99.77094,99.56732,100.6872,99.66913,100.1782,99.46552,100.8908,99.87274,100.0764,99.36371,100.1782,99.1601,99.2619,98.85467,99.05828,98.85467,98.54925,98.14202,98.34563,97.53118,97.53118,97.32757,97.42937,97.12395,97.42937,97.12395,97.42937,96.81853,97.02214,97.02214,97.93841,97.02214,97.12395,96.71672,97.12395],"rent":[64.5,65.2,66.6,67.1,67.8,68.6,69.6,70.0,70.6,71.7,72.5,72.7,73.3,74.2,75.2,75.9,76.2,76.8,77.7,78.1,78.7,79.3,80.1,80.5,80.9,81.2,82.1,82.4,82.8,83.7,85.0,85.3,85.6,86.3,86.7,87.4,87.8,88.8,89.6,90.0,90.5,91.0,91.8,92.2,92.8,93.2,94.2,94.6,94.9,95.9,97.0,97.4,97.9,98.4,99.3,99.6,100.1,100.6,101.3,101.7,102.4,102.7,103.1,103.5,103.7,104.0,104.2,104.6,104.8,105.0,105.3,105.3,105.4,104.9,104.9,104.7,104.6,104.7,104.9,104.8,104.6,104.4,104.6,104.7,104.6,104.4,104.3,104.3,104.2,104.2,104.1,104.0,103.9,103.8,103.8,103.8,103.6,103.5,103.4,103.3,103.2,103.2,103.1,103.0],"un":[1.9,2.0,2.0,2.1,2.1,2.2,2.2,2.2,2.2,2.3,2.4,2.5,2.7,2.7,2.6,2.6,2.7,2.7,2.8,2.7,2.5,2.5,2.6,2.7,2.7,2.8,2.9,2.7,3.0,2.9,2.8,2.7,2.7,2.5,2.5,2.4,2.3,2.4,2.2,2.2,2.2,2.1,2.1,2.2,2.0,2.1,2.1,2.0,2.1,2.1,2.1,2.2,2.3,2.3,2.5,2.7,2.8,2.8,2.9,3.0,3.0,3.1,3.1,3.2,3.5,3.4,3.4,3.4,3.3,3.2,3.4,3.5,3.6,4.0,4.1,4.3,4.5,4.7,4.8,4.6,4.7,4.8,4.7,4.7,4.8,4.8,5.0,5.3,5.2,5.3,5.4,5.4,5.4,5.5,5.2,5.1,4.9,4.8,4.9,4.6,4.5,4.5,4.4,4.4],"tb":[6.25,6.5,6.75,7.0,7.25,7.062,6.875,6.688,6.5,6.375,6.25,6.125,6.0,6.0,6.0,6.0,6.0,5.938,5.875,5.812,5.75,5.75,5.75,5.75,5.75,5.315,4.88,4.445,4.01,3.917,3.825,3.732,3.64,3.64,3.64,3.64,3.64,3.873,4.105,4.338,4.57,5.01,5.45,5.89,6.33,6.135,5.94,5.745,5.55,5.18,4.81,4.44,4.07,3.565,3.06,2.555,2.05,2.325,2.6,2.875,3.15,2.65,2.15,1.65,1.15,1.062,0.975,0.887,0.8,0.713,0.625,0.538,0.45,0.4,0.35,0.3,0.25,0.237,0.225,0.213,0.2,0.2,0.2,0.2,0.2,0.168,0.135,0.103,0.07,0.07,0.07,0.07,0.07,0.068,0.065,0.062,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06],"call":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,6.4167,6.66,7.0455,4.9661,4.6298,4.5365,4.3304,3.7147,3.295,3.5,3.6994,3.4946,3.8646,4.1712,4.09375,4.42031,5.2247,6.00893,6.58059,7.1625,7.52415,7.81108,8.05428,8.23363,7.4606,6.85795,5.52632,4.76637,4.53125,4.07386,3.89967,3.17857,3.26278,2.50781,2.33125,2.175,2.08185,2.2375,2.25,1.525,0.94667,0.46667,0.46632,0.48571,0.48217,0.475,0.48421,0.49619,0.49273,0.48,0.43526,0.44333,0.41318,0.23545,0.22526,0.03143,0.03,0.0245,0.02053,0.02,0.021,0.24762,0.24895,0.02,0.01286,0.00314,0.00111,0.00148,0.00178,0.00191,0.002,0.001,0.002,0.001,0.0,0.0,0.0,0.001,0.001,0.001,0.001,0.001],"sp":[29.89752,29.7138,30.24562,31.85137,32.59719,35.19824,38.03264,35.13442,36.92647,34.48594,34.2197,34.90171,37.95335,39.85627,42.64426,44.23454,48.96734,55.24402,49.92976,54.14816,59.76926,62.68681,67.04316,66.2896,66.69829,79.53527,89.90852,91.16552,106.2974,132.2105,128.6773,130.4507,117.8599,139.6081,140.3843,136.8724,157.1257,158.8024,162.877,172.0036,177.8451,139.4618,150.8284,113.3166,109.7976,128.3486,116.7022,120.5486,104.9772,83.73433,80.61888,83.82136,82.36322,100.3417,104.4931,105.9963,97.83155,103.6673,106.5558,101.9275,95.65531,84.0315,83.67954,92.31295,103.1097,108.11,105.7082,102.2414,88.94351,88.72047,98.48648,86.58485,78.11066,78.77333,81.2577,65.98856,69.69578,85.70881,94.99264,97.90246,106.8891,107.1289,100.0677,93.21606,82.83895,84.71093,78.87325,69.13689,64.67934,69.84146,64.66644,56.11748,54.5878,50.97083,61.15713,68.54835,68.32854,77.43574,73.91869,71.55228,73.77236,74.57426,76.68411,90.18312],"div":[0.50826,0.49771,0.49905,0.51758,0.52156,0.55437,0.58951,0.5358,0.5539,0.50867,0.49619,0.49735,0.53135,0.54304,0.56504,0.56952,0.61209,0.66983,0.58667,0.61594,0.65746,0.65432,0.66205,0.61736,0.58361,0.65123,0.68555,0.6439,0.69093,0.83531,0.78956,0.77683,0.68041,0.78055,0.75934,0.71543,0.7927,0.77241,0.76259,0.77402,0.93369,0.83677,1.01809,0.84987,0.86268,1.05426,1.00025,1.07638,0.97482,0.80745,0.80619,0.80326,0.75502,0.87799,0.87074,0.83917,0.73374,0.7775,0.79917,0.76446,0.71741,0.63024,0.6276,0.69235,0.77332,0.81082,0.82452,0.82816,0.74713,0.77187,0.88638,0.80524,0.74986,0.77986,0.82883,0.69288,0.66908,0.74567,0.74094,0.67553,0.64133,0.70041,0.70818,0.70984,0.67547,0.73631,0.72808,0.6754,0.66671,0.7575,0.73623,0.66909,0.68027,0.66262,0.7767,0.85,0.82678,0.91374,0.85006,0.80139,0.80412,0.79049,0.78985,0.90183],"dy":[1.7,1.675,1.65,1.625,1.6,1.575,1.55,1.525,1.5,1.475,1.45,1.425,1.4,1.3625,1.325,1.2875,1.25,1.2125,1.175,1.1375,1.1,1.0438,0.9875,0.9313,0.875,0.8188,0.7625,0.7063,0.65,0.6318,0.6136,0.5955,0.5773,0.5591,0.5409,0.5227,0.5045,0.4864,0.4682,0.45,0.525,0.6,0.675,0.75,0.7857,0.8214,0.8571,0.8929,0.9286,0.9643,1.0,0.9583,0.9167,0.875,0.8333,0.7917,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.78,0.81,0.84,0.87,0.9,0.93,0.96,0.99,1.02,1.05,0.96,0.87,0.78,0.69,0.6,0.6538,0.7077,0.7615,0.8154,0.8692,0.9231,0.9769,1.0308,1.0846,1.1385,1.1923,1.2462,1.3,1.27,1.24,1.21,1.18,1.15,1.12,1.09,1.06,1.03,1.0],"house":[15813000.0,16332000.0,16851000.0,17301000.0,17751000.0,18172000.0,18599000.0,18979000.0,19360000.0,19670000.0,19983000.0,20234000.0,20484000.0,20682000.0,20882000.0,21055000.0,21228000.0,21375000.0,21522000.0,21670000.0,21817000.0,21928000.0,22042000.0,22163000.0,22284000.0,22439000.0,22595000.0,22941000.0,23287000.0,24001000.0,24723000.0,24974000.0,25225000.0,25484000.0,25744000.0,26168000.0,26592000.0,27220000.0,27855000.0,28927000.0,30000000.0,31041000.0,32093000.0,32491000.0,32889000.0,32846000.0,32803000.0,32439000.0,32076000.0,31678000.0,31280000.0,30882000.0,30484000.0,30226000.0,29965000.0,29775000.0,29585000.0,29464000.0,29343000.0,29239000.0,29135000.0,29023000.0,28910000.0,28763000.0,28616000.0,28486000.0,28356000.0,28270000.0,28183000.0,28106000.0,28028000.0,27924000.0,27820000.0,27682000.0,27543000.0,27310000.0,27076000.0,26852000.0,26626000.0,26367000.0,26107000.0,25848000.0,25588000.0,25311000.0,25035000.0,24742000.0,24446000.0,24118000.0,23789000.0,23462000.0,23131000.0,22760000.0,22388000.0,22018000.0,21644000.0,21298000.0,20952000.0,20640000.0,20329000.0,20078000.0,19827000.0,19603000.0,19377000.0,19221000.0],"mort":[8.22,8.295,8.37,8.445,8.52,8.475,8.43,8.385,8.34,8.37,8.4,8.43,8.46,8.37,8.28,8.19,8.1,8.01,7.92,7.83,7.74,7.725,7.71,7.695,7.68,7.135,6.59,6.045,5.5,5.55,5.6,5.65,5.7,5.7,5.7,5.7,5.7,5.775,5.85,5.925,6.0,6.625,7.25,7.875,8.5,8.1,7.7,7.3,6.9,6.6,6.3,6.0,5.7,5.225,4.75,4.275,3.8,3.85,3.9,3.95,4.0,3.657,3.315,2.973,2.63,2.63,2.63,2.63,2.63,2.63,2.63,2.63,2.63,2.598,2.565,2.532,2.5,2.47,2.44,2.41,2.38,2.41,2.44,2.47,2.5,2.47,2.44,2.41,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.38,2.379,2.377,2.376],"gold":[5105.0,4175.0,4600.0,4595.0,3830.0,3570.0,3165.0,3240.0,2885.0,2675.0,2650.0,3480.0,3385.0,3250.0,3260.0,3055.0,2910.0,2860.0,2895.0,2815.0,2515.0,2720.0,2585.0,2315.0,2195.0,1975.0,1865.0,2175.0,2115.0,2025.0,2180.0,2210.0,1955.0,1870.0,1925.0,1730.0,1678.0,1718.0,1817.0,1722.0,1944.0,1998.0,1842.0,1861.0,1749.0,1697.0,1721.0,1600.0,1487.0,1553.0,1472.0,1433.0,1422.0,1331.0,1390.0,1294.0,1520.0,1385.0,1310.0,1339.0,1320.0,1164.0,1128.0,1320.0,1417.0,1410.0,1434.0,1446.0,1451.0,1520.0,1342.0,1412.0,1335.0,1404.0,1438.0,1413.0,1159.0,1176.0,1121.0,1126.0,1036.0,1038.0,1083.0,1050.0,1081.0,1141.0,1177.0,1232.0,1289.0,1407.0,1320.0,1381.0,1480.0,1405.0,1451.0,1497.0,1559.0,1550.0,1495.0,1601.0,1544.0,1601.0,1662.0,1841.0],"wage":[118.5,118.5,119.625,120.75,121.875,123.0,124.125,125.25,126.375,127.5,128.675,129.85,131.025,132.2,133.025,133.85,134.675,135.5,136.35,137.2,138.05,138.9,140.275,141.65,143.025,144.4,145.775,147.15,148.525,149.9,151.275,152.65,154.025,155.4,156.775,158.15,159.525,160.9,163.15,165.4,167.65,169.9,172.275,174.65,177.025,179.4,181.275,183.15,185.025,186.9,187.75,188.6,189.45,190.3,190.825,191.35,191.875,192.4,192.85,193.3,193.75,194.2,193.95,193.7,193.45,193.2,193.375,193.55,193.725,193.9,194.3,194.7,195.1,195.5,195.775,196.05,196.325,196.6,196.675,196.75,196.825,196.9,197.25,197.6,197.95,198.3,198.35,198.4,198.45,198.5,199.2,199.9,200.6,201.3,200.55,199.8,199.05,198.3,197.9,197.5,197.1,196.7,196.7,196.7],"bonus":[4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.9,4.95,5.0,5.05,5.1,5.1375,5.175,5.2125,5.25,5.3,5.35,5.4,5.45,5.45,5.45,5.45,5.45,5.4261,5.4023,5.3784,5.3545,5.3307,5.3068,5.283,5.2591,5.2352,5.2114,5.1875,5.1636,5.1398,5.1159,5.092,5.0682,5.0443,5.0205,4.9966,4.9727,4.9489,4.925,4.9011,4.8773,4.8534,4.8295,4.8057,4.7818,4.758,4.7341,4.7102,4.6864,4.6625,4.6386,4.6148,4.5909,4.567,4.5432,4.5193,4.4955,4.4716,4.4477,4.4239,4.4,4.4,4.4,4.4,4.4,4.4,4.4,4.4,4.4,4.4,4.4],"usd":[237.8886,250.275,221.1364,209.3227,202.3667,214.9759,232.3261,231.519,224.805,244.1068,255.031,271.615,232.731,237.7467,240.516,232.8855,233.8,225.2,243.0676,246.7545,254.1829,251.8455,241.1364,214.6805,199.8905,175.0918,158.6059,156.4723,154.8295,142.8986,150.2939,143.32,127.6853,124.8976,133.0215,128.6805,127.3625,132.0365,140.424,142.2067,144.9819,158.4586,149.0395,129.5909,133.6986,137.1127,137.83,130.7723,125.4614,133.5395,125.8817,121.1652,124.9932,112.4114,107.6914,107.02,111.4415,103.4843,98.445,98.353,99.766,83.6895,87.397,100.839,105.7514,107.1995,109.1909,112.4123,117.9124,125.6377,115.3759,121.0605,129.5475,131.7536,140.7874,121.0486,113.29,119.7723,119.3305,105.965,105.296,105.627,108.2115,108.4429,116.6719,123.771,124.4981,121.4536,132.6833,130.7718,117.8991,123.9077,118.8133,119.895,118.6959,109.4955,106.2685,107.6564,109.4871,108.7835,103.341,107.1938,111.9535,114.8695],"infl":[7.4,5.0,4.3,4.1,7.4,5.0,4.3,4.1,3.2,3.0,2.0,3.1,2.2,2.0,2.3,1.5,1.9,2.2,2.5,2.1,2.6,2.3,2.4,1.9,1.6,1.0,0.1,-0.4,-1.1,0.1,0.1,0.7,0.8,0.2,0.5,1.1,1.2,2.4,3.0,2.9,3.3,2.8,2.3,3.1,4.0,3.4,3.5,2.7,1.7,2.5,1.6,1.0,1.3,0.8,1.9,1.4,1.2,0.8,-0.2,0.7,0.6,-0.2,0.2,-0.6,-0.5,0.2,0.4,0.5,0.6,1.9,1.9,2.5,1.8,0.4,-0.1,0.2,0.2,-0.1,-0.1,-0.7,-0.7,-0.8,-0.5,-1.1,-0.3,-0.7,-0.7,-0.7,-1.3,-1.0,-0.8,-0.9,-0.4,-0.1,-0.2,0.0,-0.3,-0.4,-0.1,0.5,0.2,0.1,-0.3,-0.8]};</script>
+<script>
+/* Game engine, Japan 1980–2005: pure functions over the game state. Runs in the browser and in Node.
+   Same API as the US version, so balance.js works unchanged. Notes are stored as {kind, key, v}
+   and turned into text by the interface, in the chosen language. */
+(function (root) {
+  'use strict';
+  var E = {};
+  var D = null;
+  E.init = function (data) { D = data; E.D = data; };
+
+  E.LEN = 60;            // one game: 15 years, quarter by quarter
+  E.MAX_START = 43;      // start no later than 1990Q4 so the data lasts to 2005Q4
+  E.GOLD_LEGAL = 0;      // no ban on gold in Japan
+  E.DOWN = 0.20;         // banks lend up to 80% of the price (公庫 融資率 80%)
+  E.CLOSING = 0.06;      // estimate: registration and acquisition taxes, stamp duty, broker 3% + ¥60,000
+  E.SELL_COST = 0.035;   // estimate: broker 3% + ¥60,000
+  E.REFI_FEE = 0.02;     // estimate
+  E.LOAN_YEARS = 25;     // estimate: bank loans for rental flats were shorter than 公庫's 35 years
+  E.RENT_YIELD = 0.055;  // estimate: gross rent / price of a new small flat in 1980Q1; afterwards rent follows CPI rent
+  E.RENT_KEEP = 0.65;    // estimate: after 管理費・修繕積立金, property tax, vacancy, repairs
+  E.AGE_LOSS = 0.018;    // a flat loses about half its price per m² by 26–30 years (REINS); rent loses 1% a year
+  E.CARD_RATE = 25;      // estimate: revolving credit and consumer loans, % a year
+  E.INT_TAX_FROM = 33;   // = 1988Q2: マル優 ends for most savers, interest taxed at a flat 20%
+  E.DIV_TAX = 0.20;      // estimate: withholding tax on dividends
+  E.CREEP = 0.35;        // share of real pay growth that goes into lifestyle (same as the US version)
+  E.KIDS = [1, 1.20, 1.36]; // estimate: expenses with 0, 1, 2 children
+  E.WIN_STREAK = 4;
+  E.REHIRE = 0.90;       // estimate: mid-career hires start lower than people who never left (中途採用)
+
+  /* 10 careers. base: monthly pay before tax in 1980 yen (scaled by the wage index for later starts).
+     bonus: multiplier on the typical number of bonus months that year. curve: [[until year, real growth a year]].
+     share: living costs as a share of average take-home pay (家計調査: 67–85% by income in 2000). */
+  E.PROFS = [
+    { id: 'salary',  age: 22, base: 118500, bonus: 1.10, share: 0.68, sens: 0.30, curve: [[15, 0.043]] },
+    { id: 'bank',    age: 22, base: 124000, bonus: 1.25, share: 0.68, sens: 0.20, curve: [[15, 0.047]], bankRisk: true },
+    { id: 'city',    age: 22, base: 101600, bonus: 1.00, share: 0.70, sens: 0.03, curve: [[15, 0.036]] },
+    { id: 'teacher', age: 22, base: 116100, bonus: 1.00, share: 0.70, sens: 0.03, curve: [[15, 0.038]] },
+    { id: 'nurse',   age: 21, base: 110000, bonus: 0.85, share: 0.72, sens: 0.10, curve: [[15, 0.020]] },
+    { id: 'auto',    age: 18, base: 100000, bonus: 1.00, share: 0.74, sens: 0.60, curve: [[15, 0.023]] },
+    { id: 'build',   age: 18, base: 120000, bonus: 0.25, share: 0.78, sens: 1.80, curve: [[10, 0.027]] },
+    { id: 'shop',    age: 18, base: 85000,  bonus: 0.20, share: 0.82, sens: 1.50, curve: [[15, 0.010]] },
+    { id: 'prog',    age: 22, base: 118500, bonus: 0.90, share: 0.70, sens: 0.60, curve: [[15, 0.044]] },
+    { id: 'doctor',  age: 24, base: 130000, bonus: 0.60, share: 0.72, sens: 0.03, curve: [[2, 0.03], [15, 0.03]], jumpAt: 2, jump: 2.3 }
+  ];
+  E.prof = function (id) { for (var i = 0; i < E.PROFS.length; i++) if (E.PROFS[i].id === id) return E.PROFS[i]; return null; };
+
+  function rng(seed) {            // mulberry32
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function lerpTable(tab, x) {   // tab: [[x, y], ...] sorted by x; linear, flat outside
+    if (x <= tab[0][0]) return tab[0][1];
+    for (var i = 1; i < tab.length; i++) if (x <= tab[i][0]) {
+      var a = tab[i - 1], b = tab[i]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]);
+    }
+    return tab[tab.length - 1][1];
+  }
+  E.label = function (q) { var n = D.q0 - 1 + q; return { y: D.y0 + Math.floor(n / 4), k: n % 4 + 1 }; };
+  function qi(y, k) { return (y - 1980) * 4 + k - 1; }   // quarter index; data start 1980Q1
+
+  E.career = function (p, years) {
+    var m = 1, prev = 0;
+    for (var i = 0; i < p.curve.length; i++) {
+      var until = p.curve[i][0], g = p.curve[i][1];
+      var span = Math.min(years, until) - prev;
+      if (span > 0) m *= Math.pow(1 + g, span);
+      prev = until;
+      if (years <= until) break;
+    }
+    if (p.jumpAt != null && years >= p.jumpAt) m *= p.jump;
+    return m;
+  };
+
+  /* Income tax + resident tax as a share of annual pay, by law period (MOF tables, single person;
+     1984–87 and 1995 figures shifted from family to single). Points above ¥8m are extrapolated. */
+  var TAX = {
+    A: [[1e6, 1.5], [2e6, 5.5], [3e6, 7.7], [5e6, 12.5], [8e6, 19.8], [12e6, 27], [20e6, 38], [40e6, 50]],   // to 1987Q3
+    B: [[1e6, 0.8], [2e6, 4.5], [3e6, 5.1], [5e6, 8.0], [8e6, 11.7], [12e6, 17], [20e6, 25], [40e6, 36]],    // 1987Q4–1998
+    C: [[1e6, 0.5], [2e6, 4.3], [3e6, 5.1], [5e6, 6.9], [8e6, 10.7], [12e6, 15], [20e6, 21], [40e6, 30]]     // 1999– (定率減税)
+  };
+  E.taxRate = function (annual, q) {
+    var tab = q < qi(1987, 4) ? TAX.A : q < qi(1999, 1) ? TAX.B : TAX.C;
+    return lerpTable(tab, annual) / 100;
+  };
+  /* Employee social insurance (pension + health + employment), % of regular pay and of bonuses.
+     Before 2003 bonuses were mostly exempt (a 1% special levy from 1995). */
+  var SOCIAL = [
+    [0, 9.85, 0], [qi(1985, 4), 10.85, 0], [qi(1991, 1), 11.9, 0], [qi(1993, 2), 11.75, 0],
+    [qi(1994, 4), 12.75, 0], [qi(1995, 2), 12.75, 1.0], [qi(1996, 4), 13.3, 1.0],
+    [qi(2001, 2), 13.5, 1.0], [qi(2002, 4), 13.6, 1.0], [qi(2003, 2), 11.6, 11.6], [qi(2005, 1), 11.7, 11.7], [qi(2005, 4), 12.0, 12.0]
+  ];
+  E.social = function (q) { var r = SOCIAL[0]; for (var i = 0; i < SOCIAL.length; i++) if (q >= SOCIAL[i][0]) r = SOCIAL[i]; return { reg: r[1] / 100, bon: r[2] / 100 }; };
+
+  /* Pay for one quarter. Bonuses are paid in the summer (Q2) and winter (Q4). */
+  E.pay = function (s, q, t) {
+    var p = E.prof(s.prof);
+    if (q == null) q = s.q;
+    if (t == null) t = s.t;
+    var monthly = p.base * E.career(p, t / 4) * s.promo * D.wage[q] / D.wage[0];
+    var months = D.bonus[q] * p.bonus;
+    if (p.jumpAt != null && t / 4 < p.jumpAt) months = 0;          // residents get no bonus
+    var k = E.label(q).k, bonusQ = (k === 2 || k === 4) ? monthly * months / 2 : 0;
+    var regular = monthly * 3, annual = monthly * (12 + months);
+    var tax = E.taxRate(annual, q), soc = E.social(q);
+    var gross = regular + bonusQ;
+    var net = gross * (1 - tax) - regular * soc.reg - bonusQ * soc.bon;
+    var avgNet = annual / 4 * (1 - tax) - regular * soc.reg - months / 4 * monthly * soc.bon;
+    return { gross: gross, net: net, regular: regular, bonus: bonusQ, monthly: monthly, annual: annual, avgNet: avgNet, months: months };
+  };
+  /* Unemployment benefit for a quarter: 60–80% of regular pay (50–80% from 2003), untaxed, with a daily cap. */
+  E.benefit = function (s, q) {
+    if (q == null) q = s.q;
+    var pay = E.pay(s, q), q2000 = qi(2000, 2);
+    var m2000 = pay.monthly * D.wage[q2000] / D.wage[q];
+    var low = q >= qi(2003, 2) ? 0.5 : 0.6;
+    var rate = m2000 <= 130000 ? 0.8 : m2000 >= 300000 ? low : 0.8 - (0.8 - low) * (m2000 - 130000) / 170000;
+    var capDay = q >= qi(2003, 2) ? 7500 : 10000;                     // yen a day in 2000 money
+    var cap = capDay * 91 * D.wage[q] / D.wage[q2000];
+    return Math.min(rate * pay.regular, cap);
+  };
+  E.expenses = function (s, q) {
+    if (q == null) q = s.q;
+    return s.life * D.cpi[q] / D.cpi[s.start] * E.KIDS[s.kids];
+  };
+  E.intTax = function (q) { return q >= E.INT_TAX_FROM ? 0.20 : 0; };
+  E.stockFee = function (q) { return q < qi(1999, 4) ? 0.012 : 0.005; };   // estimate: fixed commissions and transfer tax until Oct 1999
+  E.GOLD_SPREAD = 0.03;                                                    // estimate: dealer buys back below its selling price
+
+  /* Rental flats. A new flat costs D.house[q]; a flat bought earlier loses value and rent with age. */
+  E.ageLoss = function (h, q) { return Math.max(0.4, 1 - E.AGE_LOSS * (q - h.bought) / 4); };
+  E.rentQ = function (q, h) {
+    var r = D.house[0] * E.RENT_YIELD / 4 * D.rent[q] / D.rent[0];
+    return h ? r * Math.max(0.6, 1 - 0.01 * (q - h.bought) / 4) : r;
+  };
+  E.houseValue = function (h, q) { return D.house[q] * E.ageLoss(h, q); };
+  E.mortPay = function (bal, rate) {
+    var r = rate / 1200, n = E.LOAN_YEARS * 12;
+    return 3 * bal * r / (1 - Math.pow(1 + r, -n));
+  };
+  function amortize(h) {
+    var r = h.rate / 1200, m = h.pay / 3;
+    for (var k = 0; k < 3; k++) { h.bal = Math.max(0, h.bal * (1 + r) - m); }
+  }
+  E.houseNet = function (h, q) { return E.rentQ(q, h) * E.RENT_KEEP - h.pay; };
+
+  E.newGame = function (profId, seed, start) {
+    var r = rng(seed);
+    if (start == null) start = Math.floor(r() * (E.MAX_START + 1));
+    var rolls = [];
+    for (var i = 0; i < E.LEN; i++) rolls.push([r(), r(), r(), r()]);
+    var p = E.prof(profId);
+    var s = {
+      prof: profId, seed: seed, start: start, t: 0, q: start,
+      cash: 0, units: 0, oz: 0, houses: [], loan: null,
+      employed: true, off: 0, promo: 1, kids: 0, life: 0, life0: 0, net0: 0,
+      streak: 0, won: false, wonAt: null, over: false, bankrupt: false,
+      rolls: rolls, hist: [], log: [], cost: { units: 0, oz: 0 }
+    };
+    var pay = E.pay(s);
+    s.net0 = pay.avgNet;
+    s.life0 = s.life = p.share * pay.avgNet;
+    s.cash = Math.round(pay.avgNet * 0.5 / 1000) * 1000;
+    s.hist.push(E.snapshot(s));
+    return s;
+  };
+
+  E.netWorth = function (s) {
+    var q = s.q, nw = s.cash + s.units * D.sp[q] + s.oz * D.gold[q];
+    for (var i = 0; i < s.houses.length; i++) nw += E.houseValue(s.houses[i], q) - s.houses[i].bal;
+    return nw;
+  };
+  E.passive = function (s) {
+    var q = s.q;
+    var interest = s.cash > 0 ? s.cash * D.tb[q] / 400 * (1 - E.intTax(q)) : 0;
+    var div = s.units * D.div[q] / 4 * (1 - E.DIV_TAX);
+    var rent = 0;
+    for (var i = 0; i < s.houses.length; i++) rent += E.houseNet(s.houses[i], q);
+    return { interest: interest, div: div, rent: rent, total: interest + div + rent };
+  };
+  E.required = function (s) { return E.expenses(s); };
+  /* Goal of the Japan version: net worth covers GOAL_YEARS of living costs (貯蓄が生活費の何年分か).
+     With deposit rates near zero after 1995, passive income could not cover expenses for anyone. */
+  E.GOAL_YEARS = 10;
+  E.cover = function (s) { return E.netWorth(s) / (E.expenses(s) * 4); };   // years of living costs saved
+  E.freedom = function (s) { return E.cover(s) / E.GOAL_YEARS; };
+  E.snapshot = function (s) {
+    var nw = E.netWorth(s);
+    return { t: s.t, nw: nw, real: nw * D.cpi[s.start] / D.cpi[s.q], free: E.freedom(s) };
+  };
+
+  /* ---------- player actions (at start-of-quarter prices) ---------- */
+  E.buyStock = function (s, amount) {
+    amount = Math.min(amount, s.cash); if (amount <= 0) return false;
+    s.units += amount * (1 - E.stockFee(s.q)) / D.sp[s.q]; s.cash -= amount; s.cost.units += amount; return true;
+  };
+  E.sellStock = function (s, frac) {
+    if (s.units <= 0) return false;
+    var u = s.units * frac; s.cash += u * D.sp[s.q] * (1 - E.stockFee(s.q)); s.cost.units *= (1 - frac); s.units -= u;
+    if (s.units < 1e-9) { s.units = 0; s.cost.units = 0; } return true;
+  };
+  E.goldOpen = function () { return true; };
+  E.buyGold = function (s, amount) {
+    amount = Math.min(amount, s.cash); if (amount <= 0) return false;
+    s.oz += amount / D.gold[s.q]; s.cash -= amount; s.cost.oz += amount; return true;
+  };
+  E.sellGold = function (s, frac) {
+    if (s.oz <= 0) return false;
+    var o = s.oz * frac; s.cash += o * D.gold[s.q] * (1 - E.GOLD_SPREAD); s.cost.oz *= (1 - frac); s.oz -= o;
+    if (s.oz < 1e-9) { s.oz = 0; s.cost.oz = 0; } return true;
+  };
+  E.houseQuote = function (s) {
+    var q = s.q, price = D.house[q], rate = D.mort[q];
+    var loan = price * (1 - E.DOWN), pay = E.mortPay(loan, rate);
+    var need = price * (E.DOWN + E.CLOSING);
+    var rent = E.rentQ(q), sumPay = pay;
+    for (var i = 0; i < s.houses.length; i++) sumPay += s.houses[i].pay;
+    var rentAll = rent; for (var j = 0; j < s.houses.length; j++) rentAll += E.rentQ(q, s.houses[j]);
+    var limit = 0.30 * E.pay(s).annual / 4 + 0.75 * rentAll;
+    var why = null;
+    if (!s.employed) why = 'job';
+    else if (s.cash < need) why = 'cash';
+    else if (sumPay > limit) why = 'bank';
+    return { price: price, rate: rate, loan: loan, pay: pay, need: need, rent: rent, net: rent * E.RENT_KEEP - pay, ok: !why, why: why, sumPay: sumPay, limit: limit };
+  };
+  E.buyHouse = function (s) {
+    var k = E.houseQuote(s); if (!k.ok) return false;
+    s.cash -= k.need;
+    s.houses.push({ bought: s.q, price: k.price, bal: k.loan, rate: k.rate, pay: k.pay });
+    return true;
+  };
+  E.houseSale = function (s, i) { var h = s.houses[i]; return E.houseValue(h, s.q) * (1 - E.SELL_COST) - h.bal; };
+  E.sellHouse = function (s, i) {
+    if (!s.houses[i]) return false;
+    s.cash += E.houseSale(s, i); s.houses.splice(i, 1); return true;
+  };
+  E.refiQuote = function (s, i) {
+    var h = s.houses[i], rate = D.mort[s.q], fee = h.bal * E.REFI_FEE;
+    var pay = E.mortPay(h.bal, rate);
+    return { rate: rate, fee: fee, pay: pay, saves: h.pay - pay, ok: rate <= h.rate - 1 && s.cash >= fee && h.bal > 0, offered: rate <= h.rate - 1 && h.bal > 0 };
+  };
+  E.refinance = function (s, i) {
+    var k = E.refiQuote(s, i); if (!k.ok) return false;
+    var h = s.houses[i]; s.cash -= k.fee; h.rate = k.rate; h.pay = k.pay; return true;
+  };
+  E.payLoan = function () { return false; };   // no student loans in this version
+
+  var COSTS = 6, GAINS = 4;
+
+  /* ---------- a turn: live through one quarter ---------- */
+  E.step = function (s) {
+    if (s.over) return null;
+    var q = s.q, roll = s.rolls[s.t], p = E.prof(s.prof);
+    var pay = E.pay(s), wasEmployed = s.employed;
+    var f = {};
+    f.salary = wasEmployed ? pay.net : E.benefit(s, q);
+    f.bonus = wasEmployed ? pay.bonus : 0;
+    f.expenses = E.expenses(s, q);
+    f.interest = s.cash > 0 ? s.cash * D.tb[q] / 400 * (1 - E.intTax(q)) : s.cash * E.CARD_RATE / 400;
+    f.div = s.units * D.div[q] / 4 * (1 - E.DIV_TAX);
+    f.rent = 0;
+    for (var i = 0; i < s.houses.length; i++) { f.rent += E.houseNet(s.houses[i], q); amortize(s.houses[i]); }
+    f.event = 0;
+    var notes = [];
+
+    // a personal event
+    var r = roll[1];
+    if (r < 0.07) {
+      f.event = -(0.25 + 0.45 * roll[2]) * f.expenses;
+      notes.push({ kind: 'bad', key: 'cost' + Math.floor(roll[3] * COSTS), v: [-f.event] });
+    } else if (r < 0.10) {
+      f.event = (0.2 + 0.3 * roll[2]) * pay.avgNet;
+      notes.push({ kind: 'good', key: 'gain' + Math.floor(roll[3] * GAINS), v: [f.event] });
+    } else if (r < 0.125 && s.kids < 2 && s.t >= 4 && s.t < 36) {
+      s.kids++;
+      notes.push({ kind: 'life', key: 'baby', v: [Math.round((E.KIDS[s.kids] / E.KIDS[s.kids - 1] - 1) * 100)] });
+    } else if (r < 0.14 && wasEmployed && s.t >= 4) {
+      s.promo *= 1.05;
+      notes.push({ kind: 'good', key: 'promo' });
+    }
+
+    // the job: layoff odds follow real unemployment; banks and brokers were failing in 1997–99
+    if (wasEmployed) {
+      var inResidency = p.jumpAt != null && s.t / 4 < p.jumpAt;
+      var pj = clamp((D.un[q] - 1.0) * 0.006, 0.003, 0.04) * p.sens;
+      if (p.bankRisk && q >= qi(1997, 4) && q <= qi(1999, 1)) pj += 0.04;
+      if (!inResidency && s.t >= 2 && roll[0] < pj) {
+        s.employed = false;
+        s.off = 1 + (D.un[q] > 4 ? 1 : 0) + (roll[3] < 0.3 ? 1 : 0);
+        notes.push({ kind: 'bad', key: p.bankRisk && q >= qi(1997, 4) && q <= qi(1999, 1) ? 'bankFail' : 'laidOff' });
+      }
+    } else {
+      s.off--;
+      if (s.off <= 0) { s.employed = true; s.promo *= E.REHIRE; notes.push({ kind: 'good', key: 'rehired' }); }
+    }
+
+    f.total = f.salary - f.expenses + f.interest + f.div + f.rent + f.event;
+    s.cash += f.total;
+
+    var prev = q;
+    s.q = q + 1; s.t += 1;
+
+    // lifestyle catches up with real pay growth
+    var now = E.pay(s);
+    var realNet = now.avgNet * D.cpi[s.start] / D.cpi[s.q];
+    var target = s.life0 + E.CREEP * Math.max(0, realNet - s.net0);
+    var lifeUp = false;
+    if (target > s.life * 1.0005) { lifeUp = target > s.life * 1.15; s.life = target; }
+    if (p.jumpAt != null && s.t / 4 === p.jumpAt) notes.push({ kind: 'good', key: 'residencyDone' });
+    else if (lifeUp) notes.push({ kind: 'life', key: 'lifeUp' });
+
+    // forced sale if consumer debt goes over the limit
+    var limit = 2 * now.avgNet;
+    if (s.cash < -limit) {
+      if (s.oz > 0) { E.sellGold(s, 1); notes.push({ kind: 'bad', key: 'soldGold' }); }
+      if (s.cash < -limit && s.units > 0) { E.sellStock(s, 1); notes.push({ kind: 'bad', key: 'soldStocks' }); }
+      while (s.cash < -limit && s.houses.length) { E.sellHouse(s, 0); notes.push({ kind: 'bad', key: 'soldHouse' }); }
+      if (s.cash < -limit) { s.over = true; s.bankrupt = true; notes.push({ kind: 'bad', key: 'bankrupt' }); }
+    }
+
+    var free = E.freedom(s);
+    if (free >= 1) s.streak++; else s.streak = 0;
+    if (!s.won && s.streak >= E.WIN_STREAK) { s.won = true; s.wonAt = s.t; }
+    if (s.t >= E.LEN) s.over = true;
+    s.hist.push(E.snapshot(s));
+
+    var rep = {
+      q: prev, t: s.t - 1, flows: f, notes: notes,
+      d: {
+        sp: D.sp[s.q] / D.sp[prev] - 1, gold: D.gold[s.q] / D.gold[prev] - 1,
+        house: D.house[s.q] / D.house[prev] - 1, cpi: D.cpi[s.q] / D.cpi[prev] - 1
+      }
+    };
+    s.log.push(rep);
+    return rep;
+  };
+
+  /* ---------- simple strategies to compare against ---------- */
+  E.BOTS = {
+    deposit: { key: 'botDeposit', act: function () {} },
+    stocks: { key: 'botStocks', act: function (s) { var keep = E.expenses(s); if (s.cash > keep) E.buyStock(s, s.cash - keep); } },
+    houses: { key: 'botHouses', act: function (s) { var keep = E.expenses(s) * 0.5; var k = E.houseQuote(s); if (k.ok && s.cash - k.need > keep) E.buyHouse(s); } }
+  };
+  E.runBot = function (profId, seed, start, bot) {
+    var s = E.newGame(profId, seed, start);
+    while (!s.over) { bot.act(s); E.step(s); }
+    return s;
+  };
+
+  root.Engine = E;
+  if (typeof module !== 'undefined' && module.exports) module.exports = E;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>var NEWS = {
+"1980Q1": {
+"en": "Bank of Japan raises its discount rate for the second month running, to 9% — matching its all-time high — as oil-driven inflation surges.",
+"ja": "日銀、公定歩合を2カ月連続引き上げ9％に 過去最高水準に並ぶ 石油高騰でインフレ警戒"
+},
+"1980Q2": {
+"en": "After a surprise no-confidence vote and the prime minister's sudden death mid-campaign, the ruling party wins a solid majority (284 of 511 seats) in a double election.",
+"ja": "不信任案可決で解散、選挙戦中に首相急死 衆参同日選で自民が過半数大きく上回る284議席"
+},
+"1980Q3": {
+"en": "Bank of Japan begins easing, cutting its discount rate to 8.25% from 9%.",
+"ja": "日銀、公定歩合を9％から8.25％に引き下げ 金融緩和に転換"
+},
+"1980Q4": {
+"en": "Bank of Japan cuts its discount rate again, to 7.25%.",
+"ja": "日銀、公定歩合を再び引き下げ 7.25％に"
+},
+"1981Q1": {
+"en": "Bank of Japan cuts its discount rate to 6.25%, its third cut in seven months.",
+"ja": "公定歩合6.25％に 半年余りで3度目の引き下げ"
+},
+"1981Q2": {
+"en": "Under U.S. pressure, Japanese automakers agree to cap car exports to America at 1.68 million a year.",
+"ja": "対米自動車輸出を年168万台に自主規制 米国の圧力受け"
+},
+"1981Q3": {
+"en": "Reform commission's first report calls for \"fiscal reconstruction without tax hikes,\" targeting welfare and education spending.",
+"ja": "臨調が第1次答申 「増税なき財政再建」へ社会保障・文教費の抑制を提言"
+},
+"1981Q4": {
+"en": "Bank of Japan trims its discount rate to 5.5%.",
+"ja": "公定歩合、5.5％に引き下げ"
+},
+"1982Q1": {
+"en": "Two disasters in two days in Tokyo: a hotel fire kills 33, and a jetliner crashes into Tokyo Bay, killing 24.",
+"ja": "東京で惨事相次ぐ ホテル火災で33人死亡、翌日には旅客機が羽田沖に墜落し24人死亡"
+},
+"1982Q2": {
+"en": "A new 500-yen coin goes into circulation.",
+"ja": "500円硬貨、発行開始"
+},
+"1982Q3": {
+"en": "Reform commission's basic report urges privatizing the national railways and the telephone and tobacco monopolies, calling the railways \"bankrupt.\"",
+"ja": "臨調が基本答申 三公社の民営化を提言 国鉄は「破産状態」"
+},
+"1982Q4": {
+"en": "The yen's slide bottoms out at 277.65 to the dollar at the start of November.",
+"ja": "円安、11月初めに1ドル=277円65銭で底"
+},
+"1983Q1": {
+"en": "OPEC cuts its benchmark crude price by $5, to $29 a barrel.",
+"ja": "OPEC、基準原油価格を1バレル5ドル下げ29ドルに"
+},
+"1983Q2": {
+"en": "A new law to regulate consumer moneylenders (\"sarakin\") is promulgated.",
+"ja": "サラ金規制法が公布 貸金業者に規制"
+},
+"1983Q3": {
+"en": "Nintendo launches its \"Family Computer\" home video-game console.",
+"ja": "任天堂、家庭用ゲーム機「ファミリーコンピュータ」を発売"
+},
+"1983Q4": {
+"en": "Bank of Japan cuts its discount rate to 5%, its first move in nearly two years.",
+"ja": "公定歩合を5％に引き下げ 約2年ぶりの変更"
+},
+"1984Q1": {
+"en": "The Nikkei stock average tops 10,000 for the first time.",
+"ja": "日経平均株価、初の1万円台"
+},
+"1984Q2": {
+"en": "U.S.-Japan yen-dollar committee report sets a timetable for financial liberalization; curbs on converting foreign money into yen are scrapped in June.",
+"ja": "日米円ドル委員会が報告書 金融自由化に日程 6月には円転換規制を撤廃"
+},
+"1984Q3": {
+"en": "The extortion gang that kidnapped a confectioner's president in spring now demands cash from a second big sweets maker.",
+"ja": "菓子メーカー社長誘拐の犯人グループ、別の大手菓子メーカーにも現金要求"
+},
+"1984Q4": {
+"en": "New 10,000-, 5,000- and 1,000-yen banknotes enter circulation.",
+"ja": "新しい一万円・五千円・千円札、発行開始"
+},
+"1985Q1": {
+"en": "With the dollar still surging, the yen stays stuck at a weak 250–260 per dollar.",
+"ja": "ドル高続き 円は1ドル=250～260円台の安値圏"
+},
+"1985Q2": {
+"en": "The state telephone monopoly is privatized as NTT.",
+"ja": "電電公社が民営化、NTT発足"
+},
+"1985Q3": {
+"en": "G5 finance chiefs agree in New York to push the dollar down; the yen leaps from about 242 to the 210s per dollar by month-end.",
+"ja": "G5、ドル高是正で合意 円は1ドル=242円前後から月末には210円台へ急騰"
+},
+"1985Q4": {
+"en": "The yen keeps climbing toward 200 per dollar; the government adds about ¥1.8 trillion in public works to boost domestic demand.",
+"ja": "円高続き1ドル=200円に迫る 政府、内需拡大へ公共事業1.8兆円追加"
+},
+"1986Q1": {
+"en": "Oil prices collapse — spot crude falls below $20 in January and to the $12 range by March; the central bank cuts its discount rate twice, to 4%.",
+"ja": "原油価格が暴落 1月に20ドル割れ、3月末には12ドル台 公定歩合は2度下げ4％に"
+},
+"1986Q2": {
+"en": "The yen briefly breaks through 160 per dollar; the discount rate is cut to 3.5%.",
+"ja": "円、一時1ドル=160円突破 公定歩合3.5％に引き下げ"
+},
+"1986Q3": {
+"en": "Japan and the U.S. sign a chip trade pact: Japan will open its market and stop selling chips below fair value.",
+"ja": "日米半導体協定を締結 市場開放とダンピング防止を約束"
+},
+"1986Q4": {
+"en": "The central bank cuts its discount rate to 3%, its fourth cut this year.",
+"ja": "公定歩合3％に 年内4度目の引き下げ"
+},
+"1987Q1": {
+"en": "Bank of Japan cuts its discount rate to 2.5%, its fifth cut in just over a year.",
+"ja": "日銀、公定歩合を2.5%に引き下げ 1年余りで5度目"
+},
+"1987Q2": {
+"en": "The state railway is broken up and privatized: seven JR companies take over.",
+"ja": "国鉄が分割民営化 JRグループ7社が発足"
+},
+"1987Q3": {
+"en": "Land fever: all of Tokyo is placed under land-deal monitoring as prices jump 85.7% in a year.",
+"ja": "東京都全域を土地取引の監視区域に 地価は1年で85.7%上昇"
+},
+"1987Q4": {
+"en": "Black Monday hits Tokyo: the Nikkei plunges 3,836 yen, a record 14.9% one-day fall.",
+"ja": "ブラックマンデー 日経平均3836円安、下落率14.9%は過去最大"
+},
+"1988Q1": {
+"en": "Official land prices: Tokyo-area residential land up 68.6% in a year, commercial land up 61.1%.",
+"ja": "地価公示 東京圏の住宅地68.6%上昇、商業地も61.1%"
+},
+"1988Q2": {
+"en": "Tax-free savings scheme ends for most savers: deposit interest is now taxed at a flat 20%.",
+"ja": "マル優原則廃止 預金利子に一律20%課税、非課税は高齢者らに限定"
+},
+"1988Q3": {
+"en": "The Emperor's grave illness casts a pall: festivals and events are cancelled nationwide.",
+"ja": "天皇陛下ご重体 全国で祭りやイベントの中止・自粛相次ぐ"
+},
+"1988Q4": {
+"en": "Parliament passes tax reform introducing a 3% consumption tax.",
+"ja": "消費税導入の税制改革6法が成立 税率3%"
+},
+"1989Q1": {
+"en": "The Emperor dies; a new era begins and the nation goes into mourning.",
+"ja": "天皇陛下崩御 新元号に、列島は服喪"
+},
+"1989Q2": {
+"en": "The new 3% consumption tax takes effect.",
+"ja": "消費税3%がスタート"
+},
+"1989Q3": {
+"en": "Ruling party routed in upper-house election and loses its majority; voters punish the new consumption tax.",
+"ja": "参院選で与党惨敗、過半数割れ 消費税に批判集中"
+},
+"1989Q4": {
+"en": "The Nikkei ends the year at an all-time high of 38,915.87.",
+"ja": "日経平均、大納会で史上最高値3万8915円87銭"
+},
+"1990Q1": {
+"en": "Finance ministry orders banks to curb real-estate lending as stocks tumble.",
+"ja": "大蔵省、不動産融資の総量規制を通達 株価は急落続く"
+},
+"1990Q2": {
+"en": "The Nikkei plunges 1,978 yen in a day to 28,002, its steepest fall since Black Monday.",
+"ja": "日経平均1978円安の2万8002円 ブラックマンデー以来の下げ幅"
+},
+"1990Q3": {
+"en": "Bank of Japan raises the discount rate to 6%, its fifth hike in 15 months, amid the Gulf crisis.",
+"ja": "日銀、公定歩合を6.0%に引き上げ 1年3カ月で5度目、湾岸危機さなか"
+},
+"1990Q4": {
+"en": "The Nikkei briefly falls below 20,000, almost halving in nine months.",
+"ja": "日経平均、一時2万円割れ 最高値からわずか9カ月でほぼ半値"
+},
+"1991Q1": {
+"en": "Gulf War bill: the government imposes temporary surtaxes on companies and oil.",
+"ja": "湾岸支援の財源に臨時増税 法人と石油に特別税"
+},
+"1991Q2": {
+"en": "Brokerage scandal: top securities houses found to have covered big clients' stock losses.",
+"ja": "大手証券、大口顧客に損失補填 証券不祥事が発覚"
+},
+"1991Q3": {
+"en": "Bank of Japan cuts its rate to 5.5%, its first cut in over four years, as tight money ends.",
+"ja": "日銀、公定歩合を5.5%に下げ 4年4カ月ぶり、金融緩和へ転換"
+},
+"1991Q4": {
+"en": "Central bank cuts rates twice to 4.5%; the cap on property lending is lifted.",
+"ja": "公定歩合、相次ぎ下げ4.5%に 不動産融資の総量規制も解除"
+},
+"1992Q1": {
+"en": "Official land prices fall nationwide for the first time in 17 years.",
+"ja": "公示地価、17年ぶりに下落 全国の住宅地5.6%減"
+},
+"1992Q2": {
+"en": "Bank of Japan cuts its rate to 3.75% as share prices keep sliding.",
+"ja": "日銀、公定歩合3.75%に引き下げ 株安止まらず"
+},
+"1992Q3": {
+"en": "Stocks sink below 15,000; the government unveils a ¥10.7 trillion stimulus package.",
+"ja": "株価1万5000円割れ 政府、総額10兆7000億円の総合経済対策"
+},
+"1992Q4": {
+"en": "Finance ministry reveals city banks' bad loans of ¥12.3 trillion.",
+"ja": "都市銀行の不良債権12.3兆円 大蔵省が公表"
+},
+"1993Q1": {
+"en": "The Bank of Japan cuts its discount rate from 3.25% to 2.5% to prop up the sagging economy.",
+"ja": "日銀、公定歩合を3.25%から2.5%へ引き下げ 景気下支え狙う"
+},
+"1993Q2": {
+"en": "Government unveils a stimulus package worth over ¥13 trillion, mostly public works.",
+"ja": "政府、総規模13兆円超の総合経済対策を決定 公共投資10.6兆円"
+},
+"1993Q3": {
+"en": "The central bank slashes its discount rate again, to 1.75%.",
+"ja": "日銀、公定歩合を1.75%に再引き下げ"
+},
+"1993Q4": {
+"en": "Japan agrees to partially open its rice market after the worst harvest since the war.",
+"ja": "コメ市場の部分開放受け入れ 戦後最悪の凶作受け"
+},
+"1994Q1": {
+"en": "PM proposes replacing the 3% consumption tax with a 7% \"welfare tax\" — and drops the plan within a day.",
+"ja": "首相、税率7%の「国民福祉税」構想を発表 翌日撤回"
+},
+"1994Q2": {
+"en": "Dollar closes below ¥100 in Tokyo for the first time since the war despite central-bank buying.",
+"ja": "円、東京市場で戦後初の1ドル=100円突破 協調介入も効かず"
+},
+"1994Q3": {
+"en": "Kansai International Airport opens on a man-made island in Osaka Bay.",
+"ja": "関西国際空港が開港 国際線を伊丹から全面移管"
+},
+"1994Q4": {
+"en": "Diet passes tax reform: consumption tax to rise to 5% in two and a half years, offset by ¥5.5 trillion in income-tax cuts.",
+"ja": "税制改革関連法成立 消費税、2年半後に5%へ 所得減税5.5兆円"
+},
+"1995Q1": {
+"en": "A magnitude-7.3 quake devastates Kobe, killing over 6,400 and causing about ¥10 trillion in damage.",
+"ja": "阪神・淡路で M7.3 の大地震 死者6434人、被害総額約10兆円"
+},
+"1995Q2": {
+"en": "The yen surges to a record ¥79.75 per dollar, breaking 80 for the first time.",
+"ja": "円、史上最高値の1ドル=79円75銭 初の80円割れ"
+},
+"1995Q3": {
+"en": "First postwar bank failure: a regional bank collapses under ¥810 billion in bad loans.",
+"ja": "兵庫銀行が経営破綻 戦後初の銀行破綻 木津信組も同日"
+},
+"1995Q4": {
+"en": "Government decides to spend ¥685 billion of taxpayer money to wind up failed housing lenders.",
+"ja": "住専処理に公的資金6850億円投入へ"
+},
+"1996Q1": {
+"en": "Another regional bank collapses as bad loans mount.",
+"ja": "太平洋銀行が経営破綻"
+},
+"1996Q2": {
+"en": "Cabinet confirms the consumption tax will rise from 3% to 5% next April as planned.",
+"ja": "消費税率5%への引き上げ、来年4月実施を閣議決定"
+},
+"1996Q3": {
+"en": "A state debt-collection agency starts work to recover loans from the seven failed housing lenders.",
+"ja": "住宅金融債権管理機構が発足 住専7社の債権回収へ"
+},
+"1996Q4": {
+"en": "Regulators order a bank to halt operations — a postwar first for Japan.",
+"ja": "阪和銀行に業務停止命令 戦後初"
+},
+"1997Q1": {
+"en": "Japan's flagship coal mine shuts after 124 years.",
+"ja": "三井三池炭鉱が閉山 124年の歴史に幕"
+},
+"1997Q2": {
+"en": "Consumption tax rises from 3% to 5%.",
+"ja": "消費税率、3%から5%に引き上げ"
+},
+"1997Q3": {
+"en": "A major supermarket chain goes bankrupt.",
+"ja": "流通大手ヤオハンが倒産 会社更生法申請"
+},
+"1997Q4": {
+"en": "A top-tier bank fails for the first time since the war, and a week later one of the Big Four brokers shuts down.",
+"ja": "拓銀が破綻、都銀で戦後初 山一證券も自主廃業"
+},
+"1998Q1": {
+"en": "Government injects ¥1.8 trillion of public money into 21 banks.",
+"ja": "大手21行に公的資金1.8兆円注入"
+},
+"1998Q2": {
+"en": "Government adopts its largest-ever stimulus package, worth over ¥16 trillion.",
+"ja": "事業規模16兆円超、過去最大の総合経済対策を決定"
+},
+"1998Q3": {
+"en": "The yen slides to ¥147 per dollar, its weakest in years.",
+"ja": "円急落、1ドル=147円64銭"
+},
+"1998Q4": {
+"en": "A major long-term credit bank is nationalized; the rescue will eventually cost taxpayers about ¥7.9 trillion.",
+"ja": "長銀を一時国有化 金融再生法を初適用"
+},
+"1999Q1": {
+"en": "The central bank pushes its key overnight rate toward zero, an unprecedented step against deflation.",
+"ja": "日銀、短期金利を事実上ゼロへ 前例なき金融緩和に踏み切る"
+},
+"1999Q2": {
+"en": "The central bank pledges to keep rates at zero until fears of deflation are dispelled.",
+"ja": "日銀「デフレ懸念払拭まで」ゼロ金利継続を表明"
+},
+"1999Q3": {
+"en": "Three of the nation's biggest banks announce plans to merge under a single holding company.",
+"ja": "第一勧銀・富士・興銀が経営統合へ 巨大金融グループ誕生"
+},
+"1999Q4": {
+"en": "Two banks from rival business groups announce a merger.",
+"ja": "住友銀行とさくら銀行が合併へ 旧財閥の垣根越える"
+},
+"2000Q1": {
+"en": "A darling of the internet boom crashes for 20 straight sessions as the tech-stock bubble begins to burst.",
+"ja": "IT人気株、20日連続ストップ安 ITバブル崩壊の兆し"
+},
+"2000Q2": {
+"en": "A new long-term care insurance system starts: everyone over 40 pays premiums, and users cover 10% of costs.",
+"ja": "介護保険制度がスタート 40歳以上が保険料、利用は1割負担"
+},
+"2000Q3": {
+"en": "The central bank ends its zero-rate policy, lifting the overnight rate to 0.25% despite government objections.",
+"ja": "日銀、ゼロ金利を解除 政府の反対押し切り0.25%に"
+},
+"2000Q4": {
+"en": "A major life insurer collapses with ¥4.5 trillion in debt, the biggest failure since the war — the second insurer to fail this month.",
+"ja": "協栄生命が破綻、負債4.5兆円で戦後最大 今月2社目の生保破綻"
+},
+"2001Q1": {
+"en": "The central bank switches to flooding banks with cash, pledging to continue until prices stop falling.",
+"ja": "日銀、量的緩和に踏み切る 物価下落止まるまで継続"
+},
+"2001Q2": {
+"en": "Two banks from rival business groups merge, creating a new mega-bank.",
+"ja": "三井住友銀行が発足 旧財閥の枠超えたメガバンク"
+},
+"2001Q3": {
+"en": "A major supermarket chain collapses with ¥1.9 trillion in group debt, the biggest retail failure since the war.",
+"ja": "マイカル経営破綻 負債1.9兆円、流通業で戦後最大"
+},
+"2001Q4": {
+"en": "Defined-contribution pensions arrive: workers now choose how their retirement money is invested.",
+"ja": "確定拠出年金が始動 「日本版401k」、運用は自己責任"
+},
+"2002Q1": {
+"en": "Two big banks merge into a new mega-bank.",
+"ja": "UFJ銀行が発足 三和と東海が合併"
+},
+"2002Q2": {
+"en": "The blanket guarantee ends for time deposits: if a bank fails, only ¥10 million plus interest is safe.",
+"ja": "ペイオフ一部解禁 定期預金の保護は1000万円と利息まで"
+},
+"2002Q3": {
+"en": "In an unusual move, the central bank says it will buy shares directly from banks.",
+"ja": "日銀、銀行保有株の買い取りへ 異例の決断"
+},
+"2002Q4": {
+"en": "The government orders major banks to halve their bad-loan ratios within two years.",
+"ja": "金融再生プログラム決定 主要行の不良債権比率を2年で半減へ"
+},
+"2003Q1": {
+"en": "The Nikkei average sinks below 8,000 as the stock slump deepens.",
+"ja": "日経平均、8000円割れ 株安止まらず"
+},
+"2003Q2": {
+"en": "The government injects nearly ¥2 trillion into a major bank whose capital has evaporated, effectively nationalizing it.",
+"ja": "りそなに公的資金1.96兆円 事実上の国有化"
+},
+"2003Q3": {
+"en": "Long-term interest rates quadruple in three months, from a record low near 0.4% to 1.6%.",
+"ja": "長期金利が急騰 0.4%台から1.6%へ、3カ月で4倍"
+},
+"2003Q4": {
+"en": "An insolvent regional bank is temporarily nationalized; shareholders are wiped out, but deposits are fully protected.",
+"ja": "足利銀行を一時国有化 債務超過、預金は全額保護"
+},
+"2004Q1": {
+"en": "Authorities spend nearly ¥15 trillion in three months selling yen to halt its rise.",
+"ja": "円売り介入、3カ月で約15兆円 円高阻止へ巨額介入"
+},
+"2004Q2": {
+"en": "Parliament passes a pension overhaul: contributions will rise every year for the next 13 years while benefits are automatically trimmed.",
+"ja": "年金改革法が成立 保険料は毎年上昇、給付は抑制へ"
+},
+"2004Q3": {
+"en": "A struggling mega-bank seeks a merger with a stronger rival, sparking a bidding war.",
+"ja": "UFJ、三菱東京と統合へ 三井住友も名乗り、争奪戦に"
+},
+"2004Q4": {
+"en": "New ¥10,000, ¥5,000 and ¥1,000 notes with stronger anti-counterfeiting features enter circulation.",
+"ja": "新しい1万円・5千円・千円札の発行開始 偽造防止を強化"
+},
+"2005Q1": {
+"en": "An internet company grabs over a third of a radio broadcaster in an after-hours trade, triggering a hostile takeover fight with a TV network.",
+"ja": "ネット企業、時間外取引でニッポン放送株35%取得 フジテレビと買収合戦"
+},
+"2005Q2": {
+"en": "The full deposit guarantee ends for ordinary savings accounts too: only ¥10 million plus interest per bank is protected.",
+"ja": "ペイオフ全面解禁 普通預金も保護は1000万円と利息まで"
+},
+"2005Q3": {
+"en": "After the upper house rejects postal privatization, the prime minister calls a snap election and wins a landslide: 296 of 480 seats.",
+"ja": "郵政法案否決で衆院解散 総選挙で自民296議席の圧勝"
+},
+"2005Q4": {
+"en": "Parliament passes the law to privatize the postal service, the nation's largest savings bank, within two years.",
+"ja": "郵政民営化法が成立 2年後に民営化へ"
+}
+};</script>
+<script>
+(function () {
+  'use strict';
+  var E = window.Engine, D = DATA;
+  E.init(D);
+  var app = document.getElementById('app');
+  var G = null, screen = 'start', offer = null, turnStart = null, dirty = false, askQuit = false;
+  var SAVE = 'shoes-japan-save-v1', LANGKEY = 'shoes-japan-lang';
+  var lang = 'en';
+  try { lang = localStorage.getItem(LANGKEY) || ((navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en'); } catch (e) { lang = (navigator.language || '').toLowerCase().indexOf('ja') === 0 ? 'ja' : 'en'; }
+
+  /* ---------- texts ---------- */
+  var T = {
+    en: {
+      title: 'In Someone Else’s Shoes', sub: 'Japan',
+      eyebrow: 'A game on real Japanese economic data',
+      intro: 'You have just started your first job in Japan. Fifteen years lie ahead, one turn per quarter. Wages, bonuses, prices, interest rates, stocks, flats and gold move exactly the way they really did. You are not told what year it is.',
+      ruleGoal: '<b>Goal.</b> Save enough to live for ' + E.GOAL_YEARS + ' years on what you own, and hold that for four quarters in a row. Net worth counts: savings, stocks, gold and flats minus what you still owe.',
+      ruleTurn: '<b>Your turn.</b> Decide where your money goes: postal savings, stocks, gold or a flat to rent out with a bank loan. Then live through the quarter and read the news.',
+      ruleLife: '<b>Life.</b> Bonuses come in summer and winter. Job losses, bills and promotions are random; the higher unemployment, the likelier you lose your job.',
+      resume: function (p, y) { return 'Continue your game: ' + p + ', year ' + y; },
+      pick: 'Pick a career. You start on day one',
+      perMonth: ' a month', bonusMonths: function (m) { return '+ bonus ≈ ' + m.toFixed(1) + ' months a year'; },
+      startsAt: function (a) { return 'starts at ' + a; }, growth: function (x) { return 'pay growth over 15 years ' + x; },
+      riskLow: 'job almost safe', riskMid: 'some layoff risk', riskHigh: 'often laid off',
+      yearOf: function (y) { return 'Year ' + y + ' of 15'; }, qname: ['Q1', 'Q2', 'Q3', 'Q4'],
+      age: function (a) { return 'age ' + a; }, outOfWork: 'out of work', kids: function (n) { return 'kids: ' + n; },
+      startOver: 'Start over', sure: 'Sure? This game will be erased',
+      dayOne: 'Day one', firstDay: function (a, c) { return 'Your first day at work. You are ' + a + ' with ' + c + ' in savings.'; },
+      noYear: 'You don’t know what year it is. Watch the rates, the prices and the news.',
+      wire: 'News · what happened this quarter', quiet: 'A quiet quarter with no big news.',
+      prices: 'Prices', stocks: 'Stocks', flat: 'Flats', gold: 'Gold',
+      balance: function (x) { return 'Your savings changed by ' + x + ' this quarter.'; },
+      gaugeLabel: 'Safety: how many years of living costs you could live on', ofGoal: function (g) { return 'goal ' + g + ' years'; },
+      years: function (x) { return x.toFixed(1) + ' years'; },
+      gaugeCap: function (nw, exp) { return '<span class="num">' + nw + '</span> net worth<br><span class="num">' + exp + '</span> living costs a year'; },
+      streak: function (n, w) { return 'Goal reached ' + n + ' of ' + w + ' quarters in a row. Hold on.'; },
+      ledgerH: 'This quarter, if you change nothing', pay: 'Take-home pay', benefit: 'Unemployment benefit',
+      bonusLine: 'of which bonus', living: 'Living expenses', card: 'Interest on consumer debt',
+      intL: 'Savings interest after tax', divL: 'Dividends after tax', rentL: 'Rent minus loan payments', passive: 'passive', left: 'Left over',
+      ecoH: 'The economy now', infl: 'inflation, year over year', unemp: 'unemployment', depRate: 'postal savings rate', mortRate: 'bank housing loan',
+      whereH: 'Where to put your money',
+      savings: 'Postal savings (定額貯金)', aYear: ' a year',
+      ownCash: function (c) { return 'Saved: <b class="num">' + c + '</b>. Anything you don’t invest sits here and earns interest.'; },
+      intTaxNote: function (on) { return on ? ' Interest is taxed at 20%.' : ' Interest on small savings is tax-free (マル優).'; },
+      onCard: function (c, r) { return 'Your savings are gone and you are borrowing: <b class="num">' + c + '</b> at ' + r + ' a year.'; },
+      stocksN: 'Stocks', index: 'index', thisQ: 'this quarter', dividend: 'dividend',
+      ownStocks: function (v, c, p) { return 'You hold <b class="num">' + v + '</b> in stocks (invested ' + c + ', ' + p + ').'; },
+      noStocks: function (f) { return 'No stocks. A basket of large Japanese companies. Broker and transfer costs about ' + f + ' each way.'; },
+      buy: 'Buy', sell: 'Sell', all: 'all',
+      goldN: 'Gold', perGram: ' a gram',
+      ownGold: function (v, c, p) { return 'You hold <b class="num">' + v + '</b> in gold (invested ' + c + ', ' + p + '). It pays no income.'; },
+      noGold: function (s) { return 'No gold. It pays no income; the dealer buys back about ' + s + ' below its selling price.'; },
+      flatN: 'Flat to rent out', loanAt: 'bank loan',
+      downRow: function (d) { return d + '% down plus taxes and fees'; }, loanRow: function (y) { return y + '-year loan payment'; },
+      rentRow: 'Rent after fees, tax and repairs', netRow: 'Net cash flow from the flat', perQ: ' /qtr',
+      buyFlat: function (x) { return 'Buy a flat for ' + x; },
+      yourFlat: function (i, y, p) { return '<b>Your flat ' + i + '</b>, bought in year ' + y + ' for ' + p; },
+      owed: function (r) { return 'Owed to the bank at ' + r; }, worth: 'Worth now (the building ages)',
+      sellFor: function (x, pos) { return 'Sell · ' + (pos ? 'you get ' : 'you pay ') + x; },
+      refi: function (r, f, s) { return 'Refinance at ' + r + ' · costs ' + f + ', payment −' + s; },
+      why: { job: 'Banks don’t lend to people out of work.', cash: 'You don’t have enough for the 20% down payment, taxes and fees.', bank: 'The bank said no: the payments would take too much of your income.' },
+      undo: 'Undo trades', live: 'Live the quarter', liveLast: 'Live the last quarter',
+      // results
+      result: 'Result', verdict: { bankrupt: 'Bankrupt', won: 'You made it', almost: 'Almost there', half: 'Halfway there', some: 'A cushion, not freedom', none: 'Living paycheck to paycheck' },
+      reveal: function (a, b, q, y) { return 'Those were the years ' + a + '–' + b + '. You started in ' + q + ' ' + y + '.'; },
+      wonText: function (y) { return 'Your net worth covered ' + E.GOAL_YEARS + ' years of living costs four quarters in a row, in the ' + ordinal(y) + ' year of your career. '; },
+      notWon: function (x) { return 'Your net worth covers ' + x + ' of living costs. '; },
+      nwText: function (nw, real, k) { return 'Net worth: ' + nw + '. In first-year yen that is ' + real + ': prices changed ×' + k + ' over these years.'; },
+      chartH: 'Your net worth by quarter', legReal: 'in first-year yen', legNom: 'on paper',
+      cmpH: 'Same years, same career, same luck', strat: 'Strategy', safety: 'Years covered', nwStart: 'Net worth, start-year ¥', you: 'You', bankruptTag: ' (bankrupt)',
+      botDeposit: 'Everything in postal savings', botStocks: 'All spare cash into stocks', botHouses: 'Buy a flat as soon as the bank says yes',
+      yenH: 'What became of ¥10,000 over these years', inv: 'Investment', paper: 'On paper', afterInfl: 'After inflation',
+      invRows: ['Postal savings with interest', 'Stocks with dividends', 'New flat (price, no rent)', 'Gold'],
+      yenHint: function (k) { return 'To buy what ¥10,000 bought at the start, you needed ¥' + k + ' at the end.'; },
+      timeH: 'Timeline: what that news was', again: 'Play again',
+      srcH: 'Where the data comes from and what is simplified',
+      src: [
+        'Prices and rent: consumer price index for Japan and its rent component (Statistics Bureau, via OECD/FRED).',
+        'Unemployment: Labour Force Survey (via OECD/FRED). Stocks: OECD share price index for Japan.',
+        'Savings: postal 定額貯金 rate; bank housing loan rate of city banks (日本の長期統計系列; Bank of Japan).',
+        'Flats: BIS residential property price index for Japan, scaled so a small flat costs ¥30 million at the start of 1990. Gold: Tokuriki Honten retail price.',
+        'Pay: graduate starting salaries (MHLW wage structure survey; 1980–88 partly estimated), bonus months (National Personnel Authority), taxes (Ministry of Finance), social insurance and unemployment benefit (MHLW).',
+        'Estimates, not measured: dividend yields, rent at 5.5% of the price at the start, owner’s costs, purchase and sale costs, consumer-loan rate (25%), pay of nurses, construction workers and doctors, layoff risk by career, cost of children.'
+      ],
+      langLabel: 'Language'
+    },
+    ja: {
+      title: '他人の靴をはいて', sub: '日本編',
+      eyebrow: '実際の日本経済データで遊ぶゲーム',
+      intro: 'あなたは社会人になったばかり。15年間を四半期ごとに生きていきます。給料、ボーナス、物価、金利、株価、マンション価格、金の価格は、すべて当時の実際の動きどおり。今が何年なのかはわかりません。',
+      ruleGoal: '<b>ゴール</b>　資産だけで' + E.GOAL_YEARS + '年分の生活費をまかなえる状態を、4四半期続けて維持すること。資産は貯金・株・金・マンションから借金を引いた純資産で数えます。',
+      ruleTurn: '<b>あなたの番</b>　お金の行き先を決めます。郵便貯金、株、金、それともローンで賃貸用マンション。そして四半期を過ごし、ニュースを読みます。',
+      ruleLife: '<b>人生</b>　ボーナスは夏と冬。失業、思わぬ出費、昇進は偶然に起きます。失業率が高い時期ほど、職を失いやすくなります。',
+      resume: function (p, y) { return '続きから遊ぶ：' + p + '、' + y + '年目'; },
+      pick: '職業を選んでください。入社初日から始まります',
+      perMonth: '（月給）', bonusMonths: function (m) { return '＋ボーナス約' + m.toFixed(1) + 'か月分／年'; },
+      startsAt: function (a) { return a + '歳から'; }, growth: function (x) { return '15年間の昇給 ' + x; },
+      riskLow: '失業の心配はほぼなし', riskMid: '失業の危険あり', riskHigh: '失業しやすい',
+      yearOf: function (y) { return '15年中 ' + y + '年目'; }, qname: ['第1四半期', '第2四半期', '第3四半期', '第4四半期'],
+      age: function (a) { return a + '歳'; }, outOfWork: '失業中', kids: function (n) { return '子ども' + n + '人'; },
+      startOver: '最初から', sure: '本当に？データが消えます',
+      dayOne: '入社初日', firstDay: function (a, c) { return '入社初日。あなたは' + a + '歳、貯金は' + c + '。'; },
+      noYear: '今が何年かはわかりません。金利、物価、ニュースから推理してください。',
+      wire: 'ニュース · この四半期の出来事', quiet: '大きなニュースのない四半期。',
+      prices: '物価', stocks: '株価', flat: 'マンション', gold: '金',
+      balance: function (x) { return 'この四半期の貯金の増減：' + x + '。'; },
+      gaugeLabel: '安心度 — 資産で何年分の生活費をまかなえるか', ofGoal: function (g) { return '目標 ' + g + '年'; },
+      years: function (x) { return x.toFixed(1) + '年分'; },
+      gaugeCap: function (nw, exp) { return '純資産 <span class="num">' + nw + '</span><br>年間の生活費 <span class="num">' + exp + '</span>'; },
+      streak: function (n, w) { return '目標達成 ' + n + '／' + w + '四半期。このまま維持しましょう。'; },
+      ledgerH: '何もしなければ、この四半期は', pay: '手取りの給料', benefit: '失業手当',
+      bonusLine: 'うちボーナス', living: '生活費', card: '借金の利息',
+      intL: '貯金の利息（税引後）', divL: '配当（税引後）', rentL: '家賃収入−ローン返済', passive: '不労所得', left: '残るお金',
+      ecoH: '現在の経済', infl: '物価上昇率（前年比）', unemp: '失業率', depRate: '郵便貯金の金利', mortRate: '住宅ローン金利',
+      whereH: 'お金の行き先',
+      savings: '郵便貯金（定額貯金）', aYear: '（年利）',
+      ownCash: function (c) { return '貯金 <b class="num">' + c + '</b>。投資しないお金はここで利息を生みます。'; },
+      intTaxNote: function (on) { return on ? '利息には20％課税。' : '少額貯蓄の利息は非課税（マル優）。'; },
+      onCard: function (c, r) { return '貯金が尽き、借金で暮らしています：<b class="num">' + c + '</b>、年利' + r + '。'; },
+      stocksN: '株式', index: '指数', thisQ: '前期比', dividend: '配当利回り',
+      ownStocks: function (v, c, p) { return '保有株 <b class="num">' + v + '</b>（投資額 ' + c + '、' + p + '）。'; },
+      noStocks: function (f) { return '株なし。日本の大企業の株をまとめて買います。手数料などは売買ごとに約' + f + '。'; },
+      buy: '買う', sell: '売る', all: '全額',
+      goldN: '金（ゴールド）', perGram: '／1g',
+      ownGold: function (v, c, p) { return '保有している金 <b class="num">' + v + '</b>（投資額 ' + c + '、' + p + '）。利息も配当もありません。'; },
+      noGold: function (s) { return '金なし。利息も配当もなく、買取価格は販売価格より約' + s + '低い。'; },
+      flatN: '賃貸用マンション', loanAt: 'ローン金利',
+      downRow: function (d) { return '頭金' + d + '％と諸費用'; }, loanRow: function (y) { return y + '年ローンの返済'; },
+      rentRow: '管理費・税・修繕を引いた家賃', netRow: 'マンションの収支', perQ: '／四半期',
+      buyFlat: function (x) { return x + 'で購入する'; },
+      yourFlat: function (i, y, p) { return '<b>マンション' + i + '</b>　' + y + '年目に' + p + 'で購入'; },
+      owed: function (r) { return 'ローン残高（金利' + r + '）'; }, worth: '現在の価値（建物は古くなる）',
+      sellFor: function (x, pos) { return '売却 · ' + (pos ? '手取り ' : '持ち出し ') + x; },
+      refi: function (r, f, s) { return r + 'で借り換え · 費用 ' + f + '、返済額 −' + s; },
+      why: { job: '無職の人には融資できません。', cash: '頭金20％と諸費用が足りません。', bank: '審査に通りません：収入に対して返済が重すぎます。' },
+      undo: '取引を取り消す', live: 'この四半期を過ごす', liveLast: '最後の四半期を過ごす',
+      result: '結果', verdict: { bankrupt: '自己破産', won: '目標達成', almost: 'あと少し', half: '道なかば', some: '備えはあるが、自由には遠い', none: 'その日暮らし' },
+      reveal: function (a, b, q, y) { return 'これは' + a + '年〜' + b + '年（' + era(a) + '〜' + era(b) + '）でした。スタートは' + y + '年の' + q + '。'; },
+      wonText: function (y) { return '純資産が生活費' + E.GOAL_YEARS + '年分を上回る状態が4四半期続きました。社会人' + y + '年目です。'; },
+      notWon: function (x) { return '純資産でまかなえる生活費は' + x + '。'; },
+      nwText: function (nw, real, k) { return '純資産は' + nw + '。最初の年の物価では' + real + 'で、この間に物価は×' + k + 'になりました。'; },
+      chartH: '純資産の推移', legReal: '最初の年の物価で', legNom: '名目',
+      cmpH: '同じ年、同じ職業、同じ運での比較', strat: '戦略', safety: '生活費の何年分', nwStart: '純資産（開始時の物価）', you: 'あなた', bankruptTag: '（破産）',
+      botDeposit: '全額を郵便貯金', botStocks: '余裕資金はすべて株式', botHouses: '融資が通ればすぐマンション購入',
+      yenH: '1万円はこの間にどうなったか', inv: '運用先', paper: '名目', afterInfl: '物価調整後',
+      invRows: ['郵便貯金（利息込み）', '株式（配当込み）', '新築マンション（価格のみ）', '金'],
+      yenHint: function (k) { return '最初に1万円で買えたものを、最後に買うには' + k + '円が必要でした。'; },
+      timeH: '年表：あのニュースはいつだったか', again: 'もう一度遊ぶ',
+      srcH: 'データの出典と簡略化した点',
+      src: [
+        '物価と家賃：消費者物価指数とその家賃（総務省統計局、OECD/FRED経由）。',
+        '失業率：労働力調査（OECD/FRED経由）。株価：OECDの日本株価指数。',
+        '貯金：郵便貯金（定額）の金利。ローン：都市銀行の住宅ローン金利（日本の長期統計系列、日本銀行）。',
+        'マンション：BISの日本住宅価格指数（1990年初めに小型マンションが3000万円になるよう換算）。金：徳力本店の小売価格。',
+        '給料：大卒初任給（厚生労働省 賃金構造基本統計調査、1980〜88年は一部推計）、ボーナス月数（人事院）、税（財務省）、社会保険料と失業手当（厚生労働省）。',
+        '推計値（実測ではない）：配当利回り、初期の家賃（価格の5.5％）、オーナーの経費、売買の諸費用、借金の金利（25％）、看護師・建設作業員・医師の給料、職業別の失業リスク、子どもの費用。'
+      ],
+      langLabel: '言語'
+    }
+  };
+  var PROF = {
+    en: {
+      salary: ['Big-company salaryman', 'Seniority pay and two big bonuses a year. Layoffs are rare, but the company decides where you live.'],
+      bank: ['Bank employee', 'The best starting pay and the fattest bonuses. Banks never fail, or so everyone says.'],
+      city: ['City hall clerk', 'Pay follows the public scale, a raise every year, almost no chance of losing the job.'],
+      teacher: ['Elementary school teacher', 'Paid a little above other civil servants by law. Steady, not rich.'],
+      nurse: ['Nurse', 'Night shifts pay extra and hospitals always need staff, but the pay ceiling comes early.'],
+      auto: ['Auto plant worker', 'Starts at 18 after high school. Good bonuses while cars sell abroad.'],
+      build: ['Construction worker', 'Paid by the day. Plenty of work while land is booming, little when it is not.'],
+      shop: ['Shop clerk on contract', 'Almost no bonus, small raises, first to go when sales drop.'],
+      prog: ['Programmer', 'A new profession with good pay. Demand rises and falls with the computer boom.'],
+      doctor: ['Doctor', 'Two years of residency on a small salary, then income more than doubles.']
+    },
+    ja: {
+      salary: ['大企業の会社員', '年功序列の給料と年2回の大きなボーナス。リストラはまれだが、転勤先は会社が決める。'],
+      bank: ['銀行員', '初任給もボーナスもトップクラス。銀行はつぶれない、と誰もが言う。'],
+      city: ['市役所職員', '給料は公務員の俸給表どおり。毎年昇給し、失業の心配はほぼない。'],
+      teacher: ['小学校教員', '法律で一般の公務員より少し高い給料。安定しているが、裕福ではない。'],
+      nurse: ['看護師', '夜勤手当がつき、病院はいつも人手不足。ただ給料の頭打ちは早い。'],
+      auto: ['自動車工場の工員', '高校を出て18歳で入社。輸出が好調なうちはボーナスも厚い。'],
+      build: ['建設作業員', '日給制。地価が上がる時代は仕事があふれ、下がれば減る。'],
+      shop: ['販売員（契約社員）', 'ボーナスはほぼなく、昇給もわずか。売上が落ちれば真っ先に切られる。'],
+      prog: ['プログラマー', '新しい職業で給料はよい。需要はコンピューターブームしだい。'],
+      doctor: ['医師', '2年間の研修医は薄給。その後、収入は2倍以上に。']
+    }
+  };
+  var NOTES = {
+    en: {
+      cost0: 'The car broke down: repairs {0}', cost1: 'A big dental bill: {0}', cost2: 'A week in hospital: {0}',
+      cost3: 'A relative’s wedding, gift money and travel: {0}', cost4: 'A funeral in the family, condolence money and travel: {0}', cost5: 'The air conditioner and fridge died together: {0}',
+      gain0: 'Year-end tax adjustment refund: +{0}', gain1: 'Won a prize in the company raffle: +{0}', gain2: 'A small inheritance from a grandparent: +{0}', gain3: 'Weekend side job: +{0}',
+      baby: 'A baby was born. Living costs went up {0}%.', promo: 'Promotion: pay +5%.',
+      laidOff: 'You lost your job. Unemployment benefit pays part of your salary while you look for work; a new employer will pay a bit less.',
+      bankFail: 'Your bank failed and you are out of a job.', rehired: 'You found a new job, at somewhat lower pay.',
+      residencyDone: 'Residency is over. Your income more than doubled, and your living costs rose with it.', lifeUp: 'Your income went up, and so did your lifestyle.',
+      soldGold: 'The lender called in your debt: your gold was sold.', soldStocks: 'The lender called in your debt: your stocks were sold.', soldHouse: 'The lender called in your debt: a flat was sold.',
+      bankrupt: 'Your debts are more than you can carry. Personal bankruptcy.'
+    },
+    ja: {
+      cost0: '車が故障、修理代 {0}', cost1: '歯医者の高い請求 {0}', cost2: '1週間の入院 {0}',
+      cost3: '親戚の結婚式（ご祝儀と交通費）{0}', cost4: '親族の葬儀（香典と交通費）{0}', cost5: 'エアコンと冷蔵庫が同時に故障 {0}',
+      gain0: '年末調整で税金が戻った ＋{0}', gain1: '会社の福引きで当選 ＋{0}', gain2: '祖父母から少し遺産 ＋{0}', gain3: '週末のアルバイト ＋{0}',
+      baby: '子どもが生まれた。生活費が{0}％増えた。', promo: '昇進：給料が5％アップ。',
+      laidOff: '職を失った。次の仕事が見つかるまで失業手当で暮らす。転職先の給料は少し下がる。',
+      bankFail: '勤め先の銀行が破綻し、職を失った。', rehired: '再就職が決まった。給料は以前より少し低い。',
+      residencyDone: '研修医の期間が終わり、収入は2倍以上に。生活費もそれにつれて増えた。', lifeUp: '収入が増え、暮らしぶりも上がった。',
+      soldGold: '借金の返済を迫られ、金を売却した。', soldStocks: '借金の返済を迫られ、株を売却した。', soldHouse: '借金の返済を迫られ、マンションを売却した。',
+      bankrupt: '借金を返しきれず、自己破産。'
+    }
+  };
+  function L() { return T[lang]; }
+  function profName(id) { return PROF[lang][id][0]; }
+  function note(n) {
+    var s = NOTES[lang][n.key] || n.key;
+    if (n.v) s = s.replace('{0}', /^cost|^gain/.test(n.key) ? money(n.v[0]) : n.v[0]);
+    return s;
+  }
+
+  /* ---------- formatting ---------- */
+  var NB = ' ';
+  function commas(x) { return Math.round(Math.abs(x)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function jaYen(a) {
+    a = Math.round(a);
+    if (a >= 1e8) { var oku = Math.floor(a / 1e8), man = Math.round((a - oku * 1e8) / 1e4); return oku + '億' + (man ? commas(man) + '万' : '') + '円'; }
+    if (a >= 1e6) return commas(Math.round(a / 1e4)) + '万円';
+    if (a >= 1e4) return (a / 1e4).toFixed(1).replace(/\.0$/, '') + '万円';
+    return commas(a) + '円';
+  }
+  function yen(a) { return lang === 'ja' ? jaYen(a) : '¥' + commas(a); }
+  function money(x) { return (x < -0.5 ? '−' : '') + yen(Math.abs(x)); }
+  function signed(x) { return Math.abs(x) < 0.5 ? yen(0) : (x < 0 ? '−' : '+') + yen(Math.abs(x)); }
+  function cls(x) { return Math.abs(x) < 0.5 ? '' : (x < 0 ? 'neg' : 'pos'); }
+  function pct(x, d) { return (x * 100).toFixed(d == null ? 1 : d).replace('-', '−') + '%'; }
+  function spct(x, d) { return (x >= 0 ? '+' : '') + pct(x, d); }
+  function rate(v, d) { return v.toFixed(d == null ? 1 : d) + '%'; }
+  function times(x) { return '×' + (x >= 10 ? x.toFixed(0) : x.toFixed(1)); }
+  function ordinal(n) { var b = n % 100, a = n % 10; return n + ((b >= 11 && b <= 13) ? 'th' : a === 1 ? 'st' : a === 2 ? 'nd' : a === 3 ? 'rd' : 'th'); }
+  function era(y) { return y < 1989 ? '昭和' + (y - 1925) + '年' : y === 1989 ? '平成元年' : '平成' + (y - 1988) + '年'; }
+  function short(v) {
+    var a = Math.abs(v), s = v < 0 ? '−' : '';
+    if (lang === 'ja') {
+      if (a >= 1e8) return s + (a / 1e8).toFixed(1).replace(/\.0$/, '') + '億';
+      if (a >= 1e4) return s + commas(Math.round(a / 1e4)) + '万';
+      return s + commas(a);
+    }
+    if (a >= 1e6) return s + '¥' + (a / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (a >= 1e3) return s + '¥' + Math.round(a / 1e3) + 'k';
+    return s + '¥' + commas(a);
+  }
+  function qKey(q) { var l = E.label(q); return l.y + 'Q' + l.k; }
+  function row(label, value, c, tag) {
+    return '<div class="row"><span>' + label + (tag ? '<span class="tag">' + tag + '</span>' : '') + '</span><span class="dots"></span><span class="num ' + (c || '') + '">' + value + '</span></div>';
+  }
+  function spark(arr) {
+    if (arr.length < 2) arr = [arr[0], arr[0]];
+    var w = 96, h = 32, p = 4, mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), n = arr.length, pts = [];
+    for (var i = 0; i < n; i++) {
+      var x = p + i / (n - 1) * (w - 2 * p), y = mx === mn ? h / 2 : h - p - (arr[i] - mn) / (mx - mn) * (h - 2 * p);
+      pts.push(x.toFixed(1) + ' ' + y.toFixed(1));
+    }
+    var last = pts[n - 1].split(' ');
+    return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true"><path class="a" d="M' + pts.join('L') + 'L' + (w - p) + ' ' + h + 'L' + p + ' ' + h + 'Z"/><path class="l" d="M' + pts.join('L') + '"/><circle cx="' + last[0] + '" cy="' + last[1] + '" r="2.6"/></svg>';
+  }
+  function langToggle() {
+    return '<div class="lang" role="group" aria-label="' + L().langLabel + '"><button data-a="lang" data-l="en" aria-pressed="' + (lang === 'en') + '">EN</button><button data-a="lang" data-l="ja" aria-pressed="' + (lang === 'ja') + '">日本語</button></div>';
+  }
+
+  /* ---------- saving ---------- */
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify({ G: G, screen: screen, offer: offer })); } catch (e) { /* without storage the game just won't survive a reload */ } }
+  function load() { try { var d = JSON.parse(localStorage.getItem(SAVE) || 'null'); if (d && d.offer) { G = d.G; screen = d.screen; offer = d.offer; } } catch (e) { G = null; } }
+  function newOffer() { var seed = Math.floor(Math.random() * 2147483647) + 1; offer = { seed: seed, start: seed % (E.MAX_START + 1) }; }
+  function markTurn() { turnStart = JSON.stringify(G); dirty = false; }
+
+  /* ---------- career picker ---------- */
+  function viewStart() {
+    var t = L();
+    var h = '<section class="hero"><div class="hero-top"><div class="eyebrow">' + t.eyebrow + '</div>' + langToggle() + '</div><h1>' + t.title + '<br><span class="muted">' + t.sub + '</span></h1>' +
+      '<p>' + t.intro + '</p><ul class="rules"><li>' + t.ruleGoal + '</li><li>' + t.ruleTurn + '</li><li>' + t.ruleLife + '</li></ul></section>';
+    if (G && !G.over && !G.won) h += '<button class="btn" data-a="resume">' + t.resume(profName(G.prof), Math.floor(G.t / 4) + 1) + '</button>';
+    h += '<section class="block"><h2>' + t.pick + '</h2><div class="profs">';
+    var probe = { prof: null, promo: 1, start: offer.start };
+    E.PROFS.forEach(function (p) {
+      probe.prof = p.id;
+      var pay = E.pay(probe, offer.start, 0);
+      var risk = p.sens < 0.15 ? t.riskLow : p.sens < 1 ? t.riskMid : t.riskHigh;
+      var meta = [t.startsAt(p.age), t.growth(times(E.career(p, 15))), risk];
+      var months = D.bonus[offer.start] * p.bonus;
+      h += '<button class="prof" data-a="pick" data-id="' + p.id + '"><span class="prof-name">' + profName(p.id) + '</span><span class="prof-pay">' + money(Math.round(pay.monthly / 100) * 100) + t.perMonth + '</span>' +
+        '<span class="prof-note">' + PROF[lang][p.id][1] + ' ' + (p.jumpAt ? '' : t.bonusMonths(months)) + '</span><span class="prof-meta"><span>' + meta.join('</span><span>') + '</span></span></button>';
+    });
+    h += '</div></section>' + sources();
+    return h;
+  }
+  function sources() { var t = L(); return '<details><summary>' + t.srcH + '</summary><ul><li>' + t.src.join('</li><li>') + '</li></ul></details>'; }
+
+  /* ---------- game screen ---------- */
+  function header() {
+    var t = L(), p = E.prof(G.prof), yr = Math.floor(G.t / 4), age = p.age + yr;
+    var h = '<header class="top"><div class="top-row"><span class="brand">' + t.title + ' · ' + t.sub + '</span><span class="when">' + t.yearOf(yr + 1) + ' · ' + t.qname[E.label(G.q).k - 1] + '</span></div>' +
+      '<div class="top-row"><span class="who">' + profName(G.prof) + ', ' + t.age(age) + (G.employed ? '' : ' · <span class="neg">' + t.outOfWork + '</span>') + (G.kids ? ' · ' + t.kids(G.kids) : '') + '</span>' +
+      '<span class="acts">' + langToggle() + '<button class="chip" data-a="quit">' + (askQuit ? t.sure : t.startOver) + '</button></span></div><div class="years" aria-hidden="true">';
+    for (var y = 0; y < 15; y++) {
+      h += '<div class="year">';
+      for (var k = 0; k < 4; k++) { var tt = y * 4 + k; h += '<i class="tick ' + (tt < G.t ? 'done' : tt === G.t ? 'now' : '') + '"></i>'; }
+      h += '</div>';
+    }
+    return h + '</div></header>';
+  }
+  function wire() {
+    var t = L(), p = E.prof(G.prof);
+    if (!G.log.length) {
+      return '<section class="wire"><div class="eyebrow">' + t.dayOne + '</div><div class="wire-head">' + t.firstDay(p.age, money(G.cash)) + '</div>' +
+        '<div class="notes"><div class="note">' + t.noYear + '</div></div></section>';
+    }
+    var rep = G.log[G.log.length - 1], n = NEWS[qKey(rep.q)];
+    var head = n ? n[lang] : t.quiet;
+    var mv = ['<span>' + t.prices + ' <b class="' + (rep.d.cpi > 0.02 ? 'neg' : '') + '">' + spct(rep.d.cpi) + '</b></span>',
+      '<span>' + t.stocks + ' <b class="' + cls(rep.d.sp) + '">' + spct(rep.d.sp) + '</b></span>',
+      '<span>' + t.flat + ' <b class="' + cls(rep.d.house) + '">' + spct(rep.d.house) + '</b></span>',
+      '<span>' + t.gold + ' <b class="' + cls(rep.d.gold) + '">' + spct(rep.d.gold) + '</b></span>'];
+    var notes = rep.notes.map(function (x) { return '<div class="note ' + (x.kind === 'bad' ? 'neg' : x.kind === 'good' ? 'pos' : '') + '">' + note(x) + '</div>'; });
+    notes.push('<div class="note">' + t.balance('<span class="num ' + cls(rep.flows.total) + '">' + signed(rep.flows.total) + '</span>') + '</div>');
+    return '<section class="wire"><div class="eyebrow">' + t.wire + '</div><div class="wire-head">' + head + '</div><div class="moves">' + mv.join('') + '</div><div class="notes">' + notes.join('') + '</div></section>';
+  }
+  function flows() {
+    var pay = E.pay(G), pas = E.passive(G);
+    var f = { sal: G.employed ? pay.net : E.benefit(G), bonus: G.employed ? pay.bonus : 0, exp: E.expenses(G), pas: pas };
+    f.card = G.cash < 0 ? G.cash * E.CARD_RATE / 400 : 0;
+    f.total = f.sal - f.exp + pas.total + f.card;
+    return f;
+  }
+  function gauge() {
+    var t = L(), cover = E.cover(G), fr = cover / E.GOAL_YEARS, w = Math.max(0, Math.min(1, fr)) * 100;
+    var h = '<section class="free"><div class="eyebrow">' + t.gaugeLabel + '</div><div class="free-row"><span class="free-pct ' + (cover < 0 ? 'neg' : '') + '">' + t.years(cover) + '</span>' +
+      '<span class="free-cap">' + t.gaugeCap(money(E.netWorth(G)), money(E.expenses(G) * 4)) + '<br>' + t.ofGoal(E.GOAL_YEARS) + '</span></div>' +
+      '<div class="bar" role="img" aria-label="' + t.years(cover) + '"><i class="' + (cover < 0 ? 'neg-fill' : '') + '" style="width:' + w.toFixed(1) + '%"></i></div>';
+    if (G.streak > 0) h += '<div class="streak pos">' + t.streak(G.streak, E.WIN_STREAK) + '</div>';
+    return h + '</section>';
+  }
+  function ledger(f) {
+    var t = L(), h = '<section class="block"><h2>' + t.ledgerH + '</h2><div class="rows">';
+    h += row(G.employed ? t.pay : t.benefit, signed(f.sal), 'pos');
+    if (f.bonus > 0.5) h += row(' ' + t.bonusLine, money(f.bonus) + (lang === 'ja' ? '（額面）' : ' gross'), 'muted');
+    h += row(t.living, signed(-f.exp), 'neg');
+    if (f.card) h += row(t.card, signed(f.card), 'neg');
+    if (G.cash > 0) h += row(t.intL, signed(f.pas.interest), cls(f.pas.interest), t.passive);
+    if (G.units > 0) h += row(t.divL, signed(f.pas.div), 'pos', t.passive);
+    if (G.houses.length) h += row(t.rentL, signed(f.pas.rent), cls(f.pas.rent), t.passive);
+    h += '<div class="row sum"><span>' + t.left + '</span><span class="dots"></span><span class="num ' + cls(f.total) + '">' + signed(f.total) + '</span></div>';
+    return h + '</div></section>';
+  }
+  function economy() {
+    var t = L(), q = G.q;
+    return '<section class="block"><h2>' + t.ecoH + '</h2><div class="eco">' +
+      '<div><b>' + rate(D.infl[q]) + '</b><span>' + t.infl + '</span></div>' +
+      '<div><b>' + rate(D.un[q]) + '</b><span>' + t.unemp + '</span></div>' +
+      '<div><b>' + rate(D.tb[q], 2) + '</b><span>' + t.depRate + '</span></div>' +
+      '<div><b>' + rate(D.mort[q], 2) + '</b><span>' + t.mortRate + '</span></div></div></section>';
+  }
+  function chips(label, act, base, enabled) {
+    var t = L(), h = '<div class="acts"><span>' + label + '</span>';
+    [[0.25, '¼'], [0.5, '½'], [1, t.all]].forEach(function (x) {
+      var v = base * x[0];
+      h += '<button class="chip" data-a="' + act + '" data-f="' + x[0] + '"' + (enabled && v >= 1 ? '' : ' disabled') + '>' + x[1] + (enabled && v >= 1 ? ' · ' + money(v) : '') + '</button>';
+    });
+    return h + '</div>';
+  }
+  function hist(arr) { return arr.slice(G.start, G.q + 1); }
+  function chg(arr) { var t = L(); return G.q > G.start ? ' · ' + t.thisQ + ' <b class="' + cls(arr[G.q] / arr[G.q - 1] - 1) + '">' + spct(arr[G.q] / arr[G.q - 1] - 1) + '</b>' : ''; }
+  function assets() {
+    var t = L(), q = G.q, cash = G.cash, h = '<section class="block"><h2>' + t.whereH + '</h2>';
+    // savings
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">' + t.savings + '</div><div class="asset-price"><b>' + rate(D.tb[q], 2) + '</b>' + t.aYear + '</div></div>' + spark(hist(D.tb)) + '</div>';
+    if (cash >= 0) h += '<div class="own">' + t.ownCash(money(cash)) + ' ' + t.intTaxNote(E.intTax(q) > 0) + '</div>';
+    else h += '<div class="own neg">' + t.onCard(money(-cash), rate(E.CARD_RATE, 0)) + '</div>';
+    h += '</div>';
+    // stocks
+    var sv = G.units * D.sp[q];
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">' + t.stocksN + '</div><div class="asset-price">' + t.index + ' <b>' + D.sp[q].toFixed(1) + '</b>' + chg(D.sp) + ' · ' + t.dividend + ' ' + rate(D.dy[q], 2) + '</div></div>' + spark(hist(D.sp)) + '</div>';
+    h += sv > 0.5 ? '<div class="own">' + t.ownStocks(money(sv), money(G.cost.units), '<span class="' + cls(sv - G.cost.units) + '">' + spct(sv / G.cost.units - 1, 0) + '</span>') + '</div>' : '<div class="own muted">' + t.noStocks(rate(E.stockFee(q) * 100)) + '</div>';
+    h += chips(t.buy, 'buyS', Math.max(0, cash), cash >= 1);
+    if (sv > 0.5) h += chips(t.sell, 'sellS', sv, true);
+    h += '</div>';
+    // gold
+    var gv = G.oz * D.gold[q];
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">' + t.goldN + '</div><div class="asset-price"><b>' + money(D.gold[q]) + '</b>' + t.perGram + chg(D.gold) + '</div></div>' + spark(hist(D.gold)) + '</div>';
+    h += gv > 0.5 ? '<div class="own">' + t.ownGold(money(gv), money(G.cost.oz), '<span class="' + cls(gv - G.cost.oz) + '">' + spct(gv / G.cost.oz - 1, 0) + '</span>') + '</div>' : '<div class="own muted">' + t.noGold(rate(E.GOLD_SPREAD * 100, 0)) + '</div>';
+    h += chips(t.buy, 'buyG', Math.max(0, cash), cash >= 1);
+    if (gv > 0.5) h += chips(t.sell, 'sellG', gv, true);
+    h += '</div>';
+    // flat
+    var k = E.houseQuote(G);
+    h += '<div class="asset"><div class="asset-head"><div><div class="asset-name">' + t.flatN + '</div><div class="asset-price"><b>' + money(k.price) + '</b>' + chg(D.house) + ' · ' + t.loanAt + ' ' + rate(k.rate, 2) + '</div></div>' + spark(hist(D.house)) + '</div><div class="rows">' +
+      row(t.downRow(Math.round(E.DOWN * 100)), money(k.need)) + row(t.loanRow(E.LOAN_YEARS), signed(-k.pay) + t.perQ, 'neg') + row(t.rentRow, signed(k.rent * E.RENT_KEEP) + t.perQ, 'pos') +
+      '<div class="row sum"><span>' + t.netRow + '</span><span class="dots"></span><span class="num ' + cls(k.net) + '">' + signed(k.net) + t.perQ + '</span></div></div>' +
+      '<div class="acts"><button class="btn" data-a="buyH"' + (k.ok ? '' : ' disabled') + '>' + t.buyFlat(money(k.need)) + '</button></div>' + (k.why ? '<div class="why">' + t.why[k.why] + '</div>' : '');
+    G.houses.forEach(function (hh, i) {
+      var net = E.houseNet(hh, q), sale = E.houseSale(G, i), rf = E.refiQuote(G, i);
+      h += '<div class="house"><div class="own">' + t.yourFlat(i + 1, Math.floor((hh.bought - G.start) / 4) + 1, money(hh.price)) + '</div><div class="rows">' +
+        row(t.worth, money(E.houseValue(hh, q))) + row(t.owed(rate(hh.rate, 2)), money(hh.bal)) + row(t.rentL, signed(net) + t.perQ, cls(net)) + '</div><div class="acts">' +
+        '<button class="chip" data-a="sellH" data-i="' + i + '">' + t.sellFor(money(Math.abs(sale)), sale >= 0) + '</button>';
+      if (rf.offered) h += '<button class="chip" data-a="refi" data-i="' + i + '"' + (rf.ok ? '' : ' disabled') + '>' + t.refi(rate(rf.rate, 2), money(rf.fee), money(rf.saves)) + '</button>';
+      h += '</div></div>';
+    });
+    return h + '</div></section>';
+  }
+  function viewPlay() {
+    var t = L(), f = flows();
+    return header() + wire() + gauge() + ledger(f) + economy() + assets() +
+      '<div class="dock"><div class="dock-in">' + (dirty ? '<button class="btn ghost" data-a="undo">' + t.undo + '</button>' : '') +
+      '<button class="btn" data-a="next">' + (G.t === E.LEN - 1 ? t.liveLast : t.live) + ' →</button></div></div>';
+  }
+
+  /* ---------- results ---------- */
+  function chart() {
+    var H = G.hist, n = H.length - 1, W = 560, HT = 280, Lm = 92, R = 18, Tm = 14, B = 36;
+    var vals = [0]; H.forEach(function (h) { vals.push(h.nw, h.real); });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals); if (mx - mn < 1) mx = mn + 1;
+    var raw = (mx - mn) / 4, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), nm = raw / mag, stepv = (nm < 1.5 ? 1 : nm < 3 ? 2 : nm < 7 ? 5 : 10) * mag;
+    var lo = Math.floor(mn / stepv) * stepv, hi = Math.ceil(mx / stepv) * stepv;
+    function X(t) { return Lm + (n ? t / n : 0) * (W - Lm - R); }
+    function Y(v) { return Tm + (hi - v) / (hi - lo) * (HT - Tm - B); }
+    var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + HT + '" role="img" aria-label="' + L().chartH + '">';
+    for (var v = lo; v <= hi + stepv / 2; v += stepv) s += '<line class="' + (Math.abs(v) < stepv / 10 ? 'zero' : 'grid') + '" x1="' + Lm + '" x2="' + (W - R) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '"/><text x="' + (Lm - 8) + '" y="' + (Y(v) + 5).toFixed(1) + '" text-anchor="end">' + short(v) + '</text>';
+    for (var t = 0; t <= n; t++) { var l = E.label(G.start + t); if (l.k === 1 && l.y % 3 === 0 && X(t) < W - 30) s += '<line class="grid" x1="' + X(t).toFixed(1) + '" x2="' + X(t).toFixed(1) + '" y1="' + (HT - B) + '" y2="' + (HT - B + 6) + '"/><text x="' + X(t).toFixed(1) + '" y="' + (HT - 10) + '" text-anchor="middle">' + l.y + '</text>'; }
+    var pr = H.map(function (h, i) { return X(i).toFixed(1) + ' ' + Y(h.real).toFixed(1); }), pn = H.map(function (h, i) { return X(i).toFixed(1) + ' ' + Y(h.nw).toFixed(1); });
+    s += '<path class="real-a" d="M' + pr.join('L') + 'L' + X(n).toFixed(1) + ' ' + Y(0).toFixed(1) + 'L' + X(0).toFixed(1) + ' ' + Y(0).toFixed(1) + 'Z"/><path class="nom" d="M' + pn.join('L') + '"/><path class="real" d="M' + pr.join('L') + '"/><circle class="dot" r="4" cx="' + X(n).toFixed(1) + '" cy="' + Y(H[n].real).toFixed(1) + '"/>';
+    return s + '</svg>';
+  }
+  function viewEnd() {
+    var t = L(), last = G.hist[G.hist.length - 1], a = E.label(G.start), b = E.label(G.q), yrs = G.t / 4, cover = last.free * E.GOAL_YEARS;
+    var title = G.bankrupt ? t.verdict.bankrupt : G.won ? t.verdict.won : last.free >= 0.75 ? t.verdict.almost : last.free >= 0.5 ? t.verdict.half : last.free >= 0.2 ? t.verdict.some : t.verdict.none;
+    var dur = lang === 'ja' ? (yrs % 1 === 0 ? yrs : yrs.toFixed(2)) + '年' : (yrs % 1 === 0 ? yrs : yrs.toFixed(2)) + (yrs === 1 ? ' year' : ' years');
+    var k = (D.cpi[G.q] / D.cpi[G.start]).toFixed(2);
+    var h = '<section class="verdict"><div class="hero-top"><div class="eyebrow">' + t.result + ' · ' + profName(G.prof) + ' · ' + dur + '</div>' + langToggle() + '</div><h1>' + title + '</h1>' +
+      '<div class="reveal">' + t.reveal(a.y, b.y, t.qname[a.k - 1], a.y) + '</div>' +
+      '<p>' + (G.won ? t.wonText(Math.ceil(G.wonAt / 4)) : t.notWon(t.years(cover))) + t.nwText(money(last.nw), money(last.real), k) + '</p></section>';
+    h += '<section class="block"><h2>' + t.chartH + '</h2><div class="legend"><span><i></i>' + t.legReal + '</span><span><i class="n"></i>' + t.legNom + '</span></div>' + chart() + '</section>';
+    h += '<section class="block"><h2>' + t.cmpH + '</h2><div class="tbl-wrap"><table><thead><tr><th>' + t.strat + '</th><th class="num">' + t.safety + '</th><th class="num">' + t.nwStart + '</th></tr></thead><tbody>' +
+      '<tr class="me"><td>' + t.you + '</td><td class="num">' + t.years(cover) + '</td><td class="num">' + money(last.real) + '</td></tr>';
+    Object.keys(E.BOTS).forEach(function (id) {
+      var s = E.runBot(G.prof, G.seed, G.start, E.BOTS[id]), x = s.hist[Math.min(G.t, s.hist.length - 1)];
+      h += '<tr><td>' + t[E.BOTS[id].key] + (s.bankrupt && s.hist.length - 1 <= G.t ? t.bankruptTag : '') + '</td><td class="num">' + t.years(x.free * E.GOAL_YEARS) + '</td><td class="num">' + money(x.real) + '</td></tr>';
+    });
+    h += '</tbody></table></div></section>';
+    var s0 = G.start, s1 = G.q, infl = D.cpi[s1] / D.cpi[s0], dep = 1, tr = 1;
+    for (var q = s0; q < s1; q++) { dep *= 1 + D.tb[q] / 400 * (1 - E.intTax(q)); tr *= (D.sp[q + 1] + D.div[q] / 4 * (1 - E.DIV_TAX)) / D.sp[q]; }
+    var rows = [dep, tr, D.house[s1] / D.house[s0], D.gold[s1] / D.gold[s0]];
+    h += '<section class="block"><h2>' + t.yenH + '</h2><div class="tbl-wrap"><table><thead><tr><th>' + t.inv + '</th><th class="num">' + t.paper + '</th><th class="num">' + t.afterInfl + '</th></tr></thead><tbody>';
+    rows.forEach(function (r, i) { h += '<tr><td>' + t.invRows[i] + '</td><td class="num">' + money(r * 10000) + '</td><td class="num ' + (r / infl < 1 ? 'neg' : 'pos') + '">' + money(r / infl * 10000) + '</td></tr>'; });
+    h += '</tbody></table></div><div class="hint">' + t.yenHint(commas(infl * 10000)) + '</div></section>';
+    h += '<section class="block"><h2>' + t.timeH + '</h2><div class="timeline">';
+    G.log.forEach(function (rep) { var n = NEWS[qKey(rep.q)]; if (n) { var l = E.label(rep.q); h += '<div><b>' + (lang === 'ja' ? l.y + '年 ' + l.k + 'Q' : l.y + ' · Q' + l.k) + '</b><span>' + n[lang] + '</span></div>'; } });
+    h += '</div></section>' + sources() + '<div class="dock"><div class="dock-in"><button class="btn" data-a="again">' + t.again + '</button></div></div>';
+    return h;
+  }
+
+  function render() {
+    document.documentElement.lang = lang;
+    document.title = T[lang].title + ' · ' + T[lang].sub;
+    app.innerHTML = screen === 'play' && G ? viewPlay() : screen === 'end' && G ? viewEnd() : viewStart();
+    save();
+  }
+
+  app.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-a]'); if (!b || b.disabled) return;
+    var a = b.dataset.a, f = parseFloat(b.dataset.f), i = parseInt(b.dataset.i, 10), done = false, top = false;
+    if (a !== 'quit') askQuit = false;
+    if (a === 'lang') { lang = b.dataset.l; try { localStorage.setItem(LANGKEY, lang); } catch (e) { /* language just won't be remembered */ } }
+    else if (a === 'pick') { G = E.newGame(b.dataset.id, offer.seed, offer.start); screen = 'play'; markTurn(); top = true; }
+    else if (a === 'resume') { screen = 'play'; markTurn(); top = true; }
+    else if (a === 'again') { G = null; newOffer(); screen = 'start'; top = true; }
+    else if (a === 'quit') { if (askQuit) { askQuit = false; G = null; newOffer(); screen = 'start'; top = true; } else askQuit = true; }
+    else if (a === 'undo') { G = JSON.parse(turnStart); dirty = false; }
+    else if (a === 'next') { E.step(G); if (G.won || G.over) screen = 'end'; markTurn(); top = true; }
+    else if (a === 'buyS') done = E.buyStock(G, G.cash * f);
+    else if (a === 'sellS') done = E.sellStock(G, f);
+    else if (a === 'buyG') done = E.buyGold(G, G.cash * f);
+    else if (a === 'sellG') done = E.sellGold(G, f);
+    else if (a === 'buyH') done = E.buyHouse(G);
+    else if (a === 'sellH') done = E.sellHouse(G, i);
+    else if (a === 'refi') done = E.refinance(G, i);
+    if (done) dirty = true;
+    render();
+    if (top) window.scrollTo(0, 0);
+  });
+
+  function boot(data) {
+    if (data && data.offer) { G = data.G; screen = data.screen; offer = data.offer; } else load();
+    if (!offer) newOffer();
+    if (!G && screen !== 'start') screen = 'start';
+    if (G && screen === 'play') markTurn();
+    render();
+  }
+  var hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(function () { return { G: G, screen: screen, offer: offer }; });
+  if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
+})();
+</script>
+</body>
+</html>

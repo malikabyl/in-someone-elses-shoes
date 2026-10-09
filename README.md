@@ -8,6 +8,10 @@ Status: playable prototype, version 1. English edition of the Russian game «К�
 
 Online: https://malikabyl.github.io/in-someone-elses-shoes/
 
+## Japan edition
+
+A second edition on Japanese data, 1980–2005, in English and Japanese: https://malikabyl.github.io/in-someone-elses-shoes/japan/ — see [japan/README.md](japan/README.md).
+
 ## Running it
 
 The whole game is one file, `index.html`, with data, engine and interface inside it. No build step and no server: open the file in a browser. Fonts load from Google Fonts; offline, the game falls back to system fonts. Your game is saved in the browser and survives a page reload.

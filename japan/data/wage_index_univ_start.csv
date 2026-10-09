@@ -1,0 +1,27 @@
+year,univ_male_start_k_yen,source
+1980,118.5,estimate: 1983 back-extrapolated at about 4% a year (1980 was +4.6% on 1979)
+1981,123.0,estimate: interpolated
+1982,127.5,estimate: interpolated
+1983,132.2,secondary: financial-field.com citing 賃金構造基本統計調査
+1984,135.5,estimate: interpolated
+1985,138.9,secondary: MOFA CEDAW annex table citing 賃金構造基本統計調査
+1986,144.4,estimate: interpolated
+1987,149.9,estimate: interpolated
+1988,155.4,estimate: interpolated
+1989,160.9,primary: starting_salaries_1989_2005.csv
+1990,169.9,primary
+1991,179.4,primary
+1992,186.9,primary
+1993,190.3,primary
+1994,192.4,primary
+1995,194.2,primary
+1996,193.2,primary
+1997,193.9,primary
+1998,195.5,primary
+1999,196.6,primary
+2000,196.9,primary
+2001,198.3,primary
+2002,198.5,primary
+2003,201.3,primary
+2004,198.3,primary
+2005,196.7,primary
