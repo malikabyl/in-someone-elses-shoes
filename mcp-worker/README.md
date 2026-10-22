@@ -1,15 +1,27 @@
-# In Someone Else's Shoes MCP (prototype)
+# In Someone Else's Shoes MCP
 
-Cloudflare Worker implementing stateless Streamable HTTP JSON-RPC MCP at /mcp. This is a discovery/launcher integration, **not** the full game simulation. The existing GitHub Pages games and their URLs are unchanged.
+Cloudflare Worker implementing stateless Streamable HTTP JSON-RPC MCP at `/mcp`, with game sessions persisted in a SQLite-backed Durable Object (`GAME_SESSIONS` → `GameSession`). The USA and Japan games are fully playable through MCP tools; the simulation is the original browser engine and historical data, extracted verbatim. The existing GitHub Pages games and their URLs are unchanged.
 
-## Deploy
-1. Connect this repository to Cloudflare Workers or install Node.js and run `npm install` in this folder.
-2. Authenticate with `npx wrangler login` and run `npm run deploy`.
-3. Test GET /health, then POST /mcp with `{"jsonrpc":"2.0","id":1,"method":"tools/list"}`.
-4. Register the deployed Worker URL ending in /mcp in your MCP client. No Worker URL is live until deployment succeeds.
+Live endpoint: https://someone-elses-shoes-mcp.someone-elses-shoes-mcp.workers.dev/mcp
+
+## Tools
+- `list_games`, `open_game(country)`, `game_guide(country)` — discovery, unchanged.
+- `list_professions(country)` — the 10 professions of each game (Japan names and texts come from `japan/index.html`, see `src/japan-text.js`).
+- `start_game(country, profession)` — new session; start quarter chosen as in the browser (`start = seed % (MAX_START+1)`).
+- `get_status(session_id)` — read-only state, including the quarter's market prices, mortgage quote and refinance offers.
+- `make_decision(session_id, action, amount?, house_index?, request_id)` — `buy_stock`, `sell_stock`, `buy_gold`, `sell_gold`, `buy_house`, `sell_house`, `refinance`, `pay_loan`. Buys take money, sells a fraction 0–1. Refusals name the reason.
+- `next_turn(session_id, request_id)` — exactly one quarter of the original engine; quarter notes include text.
+- `end_game(session_id, request_id)` — final nominal and real outcome; works after the natural end too.
+
+Mutating calls are idempotent by `request_id` (a key reused for another operation is refused). Sessions idle for 30 days are deleted by a Durable Object alarm.
+
+## Develop and deploy
+1. `npm install` in this folder.
+2. `npm run check` — syntax checks, engine tests and MCP integration tests (`test/mcp.test.js` replays every MCP game in the original engine and compares each quarter).
+3. `npx wrangler login`, then `npx wrangler deploy`.
+4. Smoke test: `GET /health`, then POST `/mcp` with `initialize` and `tools/list`.
+
+`src/japan-text.js` is generated from `japan/index.html` (`PROF.en`, `NOTES.en`); regenerate it if those texts change.
 
 ## Monetization
 Keep the games free during validation. An optional donation button can be added after the company's verified donation/payment checkout URL is available. Do not embed bank credentials or unverified payment links.
-
-## Next
-To make actual turn-by-turn gameplay available through MCP, extract and test the browser simulation engine into a shared module and implement persistent game sessions (e.g., Durable Objects). Do not pretend that launcher tools are a complete playable MCP game.
