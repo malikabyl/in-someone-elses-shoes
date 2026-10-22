@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — In Someone Else's Shoes</title>
+<meta name="description" content="What data the In Someone Else's Shoes game and its ChatGPT app process, why, with whom, and for how long.">
+<link rel="stylesheet" href="../legal.css">
+</head>
+<body>
+<main>
+<nav><a href="../">USA game</a><a href="../japan/">Japan game</a><a href="./" aria-current="page">Privacy</a><a href="../terms/">Terms</a><a href="../support/">Support</a><a href="../data-deletion/">Data deletion</a></nav>
+<h1>Privacy Policy</h1>
+<p class="updated">Last updated: 22 October 2026</p>
+
+<p>This policy covers <strong>In Someone Else's Shoes</strong>, a free historical financial life simulation: the browser games at <code>malikabyl.github.io/in-someone-elses-shoes</code> (USA 1971–1991 and Japan 1980–2005) and the ChatGPT app that plays the same games through our MCP service at <code>someone-elses-shoes-mcp.someone-elses-shoes-mcp.workers.dev</code>. It is published by <strong>ND SaaS Solutions LLP</strong> (ТОО «ND SaaS Solutions»), Kazakhstan (“we”). It does not cover any other product of the company.</p>
+
+<div class="card"><strong>In short:</strong> no account, no payment, no name or email is asked for. Browser progress stays in your browser. The chat version stores only the simulated game, under a random session ID, and deletes it automatically 30 days after its last change — or immediately when you ask ChatGPT to delete the game. Visits to the browser games are counted with cookie-free GoatCounter statistics. We do not sell data or use it for advertising.</div>
+
+<h2>1. Browser games</h2>
+<ul>
+<li><strong>Game progress</strong> is saved in your browser's local storage on your device (and, in the Japan edition, your language choice). It is not sent to us.</li>
+<li><strong>Visit statistics.</strong> On the public site the pages load GoatCounter and count page views and a few game events: starting a game (with the chosen profession), finishing or winning, the year-guess step, sharing, and switching language (Japan). According to GoatCounter's documentation, it records the page path, referrer, browser and operating system derived from browser headers, screen width, language and a country-level location derived from the IP address; it does not store IP addresses or the full User-Agent, and does not use cookies or other browser storage. Statistics are kept in our GoatCounter account and are not linked to a name or account.</li>
+<li><strong>Hosting.</strong> The site is hosted on GitHub Pages. GitHub states that a visitor's IP address is logged and stored for security purposes.</li>
+<li><strong>Fonts.</strong> The pages load fonts from Google Fonts, so your browser sends a standard web request (including your IP address) to Google.</li>
+<li>Sharing a result uses your device's share sheet or clipboard; nothing is sent to us.</li>
+</ul>
+
+<h2>2. ChatGPT app (MCP service)</h2>
+<p>When you play in ChatGPT, ChatGPT sends tool requests to our MCP service on Cloudflare Workers. We receive the tool arguments: country, profession, game actions and amounts, the random session ID and request IDs. We do not ask for your name, email, payment details or chat history. ChatGPT may attach its own metadata to requests (for example locale); our service does not store it — only the tool arguments above are used.</p>
+<p>For each game we store, in a Cloudflare Durable Object: the simulated game state (career, money, holdings, quarter history and events) and the results of up to 100 recent actions, so that a repeated request is not executed twice. Sessions are identified only by a random 128-bit ID created when the game starts.</p>
+<p>Our code does not write request logs, and as of 22 October 2026 Cloudflare Workers Logs and Logpush are not enabled for this service. Cloudflare, as the infrastructure provider, processes the network data of incoming requests (which come from ChatGPT's servers) and shows us aggregate usage metrics.</p>
+<p>How ChatGPT itself handles your conversations is governed by OpenAI's policies.</p>
+
+<h2>3. Why we use the data</h2>
+<ul>
+<li>To run the game and keep your chat game between requests.</li>
+<li>To prevent duplicate actions when a request is retried.</li>
+<li>To understand, in aggregate, how many people play and which careers they choose.</li>
+</ul>
+<p>We do not sell data, use it for advertising, or build profiles of players.</p>
+
+<h2>4. How long it is kept</h2>
+<div class="table-wrap"><table>
+<tr><th>Data</th><th>Where</th><th>Retention</th></tr>
+<tr><td>Chat game session (state and up to 100 action results)</td><td>Cloudflare Durable Objects</td><td>Deleted automatically 30 days after the game was started or last changed (an action, a new quarter or ending the game). Viewing the status does not extend this. Deleted immediately with <a href="../data-deletion/">delete_game</a>. Ending a game does not delete it.</td></tr>
+<tr><td>Browser game save, language choice</td><td>Your browser</td><td>Until you start over or clear the site's data.</td></tr>
+<tr><td>Visit statistics</td><td>GoatCounter</td><td>Kept in our GoatCounter account under its settings; see GoatCounter's privacy policy.</td></tr>
+<tr><td>Hosting and infrastructure logs</td><td>GitHub, Cloudflare</td><td>Under each provider's own policy.</td></tr>
+</table></div>
+
+<h2>5. Who has access</h2>
+<p>ND SaaS Solutions LLP, through its Cloudflare and GoatCounter accounts. Our service providers process data on their own infrastructure: Cloudflare (MCP service and storage), GitHub (website hosting), GoatCounter (statistics), Google (fonts) and, for the chat version, OpenAI (ChatGPT). We do not share game data with anyone else.</p>
+
+<h2>6. Your choices</h2>
+<ul>
+<li>Delete a chat game at any time — see <a href="../data-deletion/">Data deletion</a>.</li>
+<li>Clear browser progress through your browser's site-data settings.</li>
+<li>Block the statistics script with a content blocker; the game works without it.</li>
+<li>Questions about this policy: see <a href="../support/">Support</a>. Please do not post personal information there.</li>
+</ul>
+
+<h2>7. Changes</h2>
+<p>We will update this page when our data practices change and revise the date above.</p>
+
+<footer>In Someone Else's Shoes · ND SaaS Solutions LLP (ТОО «ND SaaS Solutions»), Kazakhstan · <a href="../terms/">Terms</a> · <a href="../support/">Support</a></footer>
+</main>
+</body>
+</html>

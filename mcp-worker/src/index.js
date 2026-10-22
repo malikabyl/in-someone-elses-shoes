@@ -17,7 +17,8 @@ const tools=[
 {name:"get_status",description:"Read current game status. Does not advance time.",inputSchema:{...obj,properties:{session_id:str},required:["session_id"]}},
 {name:"make_decision",description:"Trade assets in the current quarter. Actions: buy_stock, sell_stock, buy_gold, sell_gold, buy_house, sell_house, refinance, pay_loan. For buys and loan payments amount is money; for sells amount is a fraction 0–1; house actions use house_index.",inputSchema:{...obj,properties:{session_id:str,action:{...str,enum:["buy_stock","sell_stock","buy_gold","sell_gold","buy_house","sell_house","refinance","pay_loan"]},amount:{type:"number"},house_index:{type:"integer",minimum:0},request_id:str},required:["session_id","action","request_id"]}},
 {name:"next_turn",description:"Advance exactly one historical quarter. Provide a unique request_id to avoid duplicate turns.",inputSchema:{...obj,properties:{session_id:str,request_id:str},required:["session_id","request_id"]}},
-{name:"end_game",description:"Finish the current session and get nominal and inflation-adjusted net worth.",inputSchema:{...obj,properties:{session_id:str,request_id:str},required:["session_id","request_id"]}}
+{name:"end_game",description:"Finish the current session and get nominal and inflation-adjusted net worth.",inputSchema:{...obj,properties:{session_id:str,request_id:str},required:["session_id","request_id"]}},
+{name:"delete_game",description:"Permanently delete a game session and all its stored data now. Cannot be undone.",inputSchema:{...obj,properties:{session_id:str},required:["session_id"]}}
 ];
 const ok=(id,value)=>({jsonrpc:"2.0",id,result:value});
 const err=(id,code,message)=>({jsonrpc:"2.0",id,error:{code,message}});
@@ -85,6 +86,7 @@ export class GameSession{
     return Response.json({state:status(country,s)});
    }
    if(!saved)return Response.json({error:"Session not found"},{status:404});
+   if(op==="delete"){await this.state.storage.deleteAlarm();await this.state.storage.deleteAll();return Response.json({deleted:true});}
    const {country,s}=saved,E=engines[country];
    if(op==="status")return Response.json({state:status(country,s),...(saved.finished||s.over||s.won?{outcome:outcome(country,s)}:{})});
    const key=args.request_id;
@@ -130,7 +132,7 @@ async function invoke(env,name,args){
   sessionId=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,"0")).join("");
  }else if(!validSession(sessionId))return response({error:"Invalid session_id"},true);
  const id=env.GAME_SESSIONS.idFromName(sessionId),stub=env.GAME_SESSIONS.get(id);
- const op={start_game:"start",get_status:"status",make_decision:"decision",next_turn:"next",end_game:"end"}[name];
+ const op={start_game:"start",get_status:"status",make_decision:"decision",next_turn:"next",end_game:"end",delete_game:"delete"}[name];
  if(!op)return response({error:"Unknown tool"},true);
  const res=await stub.fetch("https://session.internal/",{method:"POST",body:JSON.stringify({op,args})});
  const result=await res.json();

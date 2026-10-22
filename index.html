@@ -663,7 +663,10 @@ var NEWS = {
       '<li>Careers: starting salaries, raises, student loans and layoff risk were checked against period surveys (BLS pay surveys, College Placement Council offers, NEA teacher salary schedules, union wage chronologies, AMA physician income).</li>' +
       '<li>Rules checked against period sources: taxes, the credit card rate (18%), broker commissions, unemployment benefits, the down payment (25%), mortgage approval, rent (7% of the house price a year at the start) and the cost of children.</li>' +
       '<li>One deliberate simplification: living costs are 63–77% of take-home pay. Real families with these incomes spent 83–92% (BLS Consumer Expenditure Survey 1972–73, Bulletin 1985, table 1), which would make the game almost impossible to win.</li>' +
-      '</ul></details>';
+      '</ul></details>' + legal();
+  }
+  function legal() {
+    return '<p style="font-size:.85em;color:var(--muted)"><a href="privacy/">Privacy</a> · <a href="terms/">Terms</a> · <a href="support/">Support</a> · <a href="data-deletion/">Data deletion</a></p>';
   }
 
   /* ---------- game screen ---------- */

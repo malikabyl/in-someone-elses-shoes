@@ -14,7 +14,7 @@ function fakeNamespace() {
       if (!objects.has(id)) {
         const data = new Map();
         const state = {
-          storage: {get: async k => structuredClone(data.get(k)), put: async (k, v) => { data.set(k, structuredClone(v)); }, setAlarm: async () => {}, deleteAll: async () => data.clear()},
+          storage: {get: async k => structuredClone(data.get(k)), put: async (k, v) => { data.set(k, structuredClone(v)); }, setAlarm: async () => {}, deleteAlarm: async () => {}, deleteAll: async () => data.clear()},
           blockConcurrencyWhile: fn => fn()
         };
         objects.set(id, new GameSession(state, {}));
@@ -40,7 +40,17 @@ test("initialize and tools/list", async () => {
   const init = await rpc("initialize", {protocolVersion: "2025-06-18", capabilities: {}, clientInfo: {name: "t", version: "1"}});
   assert.equal(init.result.serverInfo.name, "someone-elses-shoes");
   const names = (await rpc("tools/list")).result.tools.map(t => t.name);
-  for (const t of ["list_games", "open_game", "game_guide", "list_professions", "start_game", "get_status", "make_decision", "next_turn", "end_game"]) assert.ok(names.includes(t), t);
+  for (const t of ["list_games", "open_game", "game_guide", "list_professions", "start_game", "get_status", "make_decision", "next_turn", "end_game", "delete_game"]) assert.ok(names.includes(t), t);
+});
+
+test("delete_game removes the session", async () => {
+  const sid = (await call("start_game", {country: "japan", profession: "nurse"})).data.session_id;
+  await call("next_turn", {session_id: sid, request_id: rid()});
+  const d = await call("delete_game", {session_id: sid});
+  assert.equal(d.isError, false); assert.equal(d.data.deleted, true);
+  const after = await call("get_status", {session_id: sid});
+  assert.equal(after.isError, true); assert.match(after.data.error, /not found/);
+  assert.equal((await call("delete_game", {session_id: sid})).isError, true, "second delete reports not found");
 });
 
 test("professions have names for both countries", async () => {

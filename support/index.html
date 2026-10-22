@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support — In Someone Else's Shoes</title>
+<meta name="description" content="How to play In Someone Else's Shoes in the browser and in ChatGPT, common problems, and how to contact support.">
+<link rel="stylesheet" href="../legal.css">
+</head>
+<body>
+<main>
+<nav><a href="../">USA game</a><a href="../japan/">Japan game</a><a href="../privacy/">Privacy</a><a href="../terms/">Terms</a><a href="./" aria-current="page">Support</a><a href="../data-deletion/">Data deletion</a></nav>
+<h1>Support</h1>
+<p class="updated">Last updated: 22 October 2026</p>
+
+<h2>How to play</h2>
+<p><strong>In the browser:</strong> open the <a href="../">USA game</a> (1971–1991) or the <a href="../japan/">Japan game</a> (1980–2005), pick a career and live through 15 years quarter by quarter: save, invest in stocks or gold, buy a home, pay debts. You win when passive income covers your living costs for four quarters in a row (USA), or when your net worth covers ten years of living costs for four quarters in a row (Japan).</p>
+<p><strong>In ChatGPT:</strong> add the In Someone Else's Shoes app and ask, for example, “Start a game in Japan as a bank employee, put half my cash into stocks and play four quarters.” ChatGPT uses these tools:</p>
+<ul>
+<li><code>list_professions</code>, <code>start_game</code> — choose a career and start;</li>
+<li><code>get_status</code> — money, holdings, prices and what the bank would lend (changes nothing);</li>
+<li><code>make_decision</code> — buy or sell stocks or gold, buy or sell a home, refinance, repay a loan;</li>
+<li><code>next_turn</code> — move one quarter forward;</li>
+<li><code>end_game</code> — see the final result; <code>delete_game</code> — erase the game.</li>
+</ul>
+
+<h2>Common problems</h2>
+<ul>
+<li><strong>An action was refused.</strong> The reply names the reason: not enough cash, the bank refuses a mortgage (no job or payments too high), gold ownership not yet legal (USA before 1975), nothing to sell, or no refinancing offer. Check <code>get_status</code> and try a smaller amount or another quarter.</li>
+<li><strong>“request_id already used”.</strong> Each action needs a new request ID; a repeated ID returns the earlier result instead of acting twice. ChatGPT normally handles this; ask it to try again as a new action.</li>
+<li><strong>“Session not found”.</strong> The game was deleted, or expired 30 days after its last change. Start a new game.</li>
+<li><strong>“Game is finished”.</strong> The 15 years are over, you won, or you went bankrupt. Ask for the final result (<code>end_game</code>) and start a new game.</li>
+<li><strong>Browser progress disappeared.</strong> Saves live in your browser's site data; clearing it, private browsing or another device starts fresh.</li>
+<li><strong>Browser and chat games differ.</strong> They are separate games; progress does not carry over.</li>
+</ul>
+
+<h2>Contact</h2>
+<p>Report problems or ask questions by opening an issue in the project's GitHub repository: <a href="https://github.com/malikabyl/in-someone-elses-shoes/issues">github.com/malikabyl/in-someone-elses-shoes/issues</a> (a free GitHub account is needed). Issues are public — include the edition (USA, Japan or ChatGPT), the quarter, the action and the exact message, but do not post personal information, chat content or session IDs.</p>
+<p>Privacy and deletion questions go to the same place; to delete a chat game yourself, see <a href="../data-deletion/">Data deletion</a>.</p>
+
+<footer>In Someone Else's Shoes · ND SaaS Solutions LLP (ТОО «ND SaaS Solutions»), Kazakhstan · <a href="../privacy/">Privacy</a> · <a href="../terms/">Terms</a></footer>
+</main>
+</body>
+</html>

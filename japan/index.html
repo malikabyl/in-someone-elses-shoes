@@ -1259,7 +1259,10 @@ body { margin: 0; }
     h += '</div></section>' + sources();
     return h;
   }
-  function sources() { var t = L(); return '<details><summary>' + t.srcH + '</summary><ul><li>' + t.src.join('</li><li>') + '</li></ul></details>'; }
+  function sources() { var t = L(); return '<details><summary>' + t.srcH + '</summary><ul><li>' + t.src.join('</li><li>') + '</li></ul></details>' + legal(); }
+  function legal() {
+    return '<p style="font-size:.85em;color:var(--muted)"><a href="../privacy/">Privacy</a> · <a href="../terms/">Terms</a> · <a href="../support/">Support</a> · <a href="../data-deletion/">Data deletion</a></p>';
+  }
 
   /* ---------- game screen ---------- */
   function header() {

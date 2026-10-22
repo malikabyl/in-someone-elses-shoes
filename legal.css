@@ -1,0 +1,26 @@
+/* Shared style for the Privacy, Terms, Support and Data deletion pages. Palette follows the game. */
+:root {
+  --paper: #E9EFE4; --card: #F6F9F2; --ink: #15231B; --muted: #586A5E; --line: #C6D2C3; --accent: #1D6846;
+  --font-display: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #0E1512; --card: #151E19; --ink: #DCE6DD; --muted: #8FA396; --line: #27352D; --accent: #5FC08F; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 var(--font-body); }
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+nav { display: flex; flex-wrap: wrap; gap: 6px 18px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: .95em; }
+nav a[aria-current="page"] { font-weight: 600; text-decoration: none; color: var(--ink); }
+a { color: var(--accent); }
+h1, h2 { font-family: var(--font-display); line-height: 1.25; }
+h1 { font-size: 1.8em; margin: 24px 0 4px; }
+h2 { font-size: 1.2em; margin: 28px 0 8px; }
+.updated { color: var(--muted); margin: 0 0 20px; font-size: .9em; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: .92em; margin: 12px 0; }
+th, td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--line); }
+.table-wrap { overflow-x: auto; }
+code { font-size: .9em; overflow-wrap: anywhere; }
+li { margin: 6px 0; }
+footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9em; }
