@@ -2,3 +2,11 @@ name = "someone-elses-shoes-mcp"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 workers_dev = true
+
+[[durable_objects.bindings]]
+name = "GAME_SESSIONS"
+class_name = "GameSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameSession"]
