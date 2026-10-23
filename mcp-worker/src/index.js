@@ -8,18 +8,38 @@ const engines={usa:USA,japan:Japan};
 for(const country of Object.keys(engines))engines[country].init(marketData[country]);
 const obj={type:"object",additionalProperties:false};
 const str={type:"string"};
+const country={...str,enum:["usa","japan"]};
+const sid={...str,description:"Session ID returned by start_game."};
+const rid={...str,minLength:8,maxLength:128,description:"Unique ID for this action; a retry with the same ID returns the first result instead of acting twice."};
+const money={type:"number",exclusiveMinimum:0,description:"Amount of game money, at most the cash on hand."};
+const fraction={type:"number",exclusiveMinimum:0,maximum:1,description:"Share of the holding to sell, from 0 to 1 (1 = all)."};
+const houseIndex={type:"integer",minimum:0,description:"Index of an owned house in get_status.houses."};
+// MCP tool annotations: the service only reads and writes its own game storage, never the outside world.
+const READ={readOnlyHint:true,destructiveHint:false,idempotentHint:true,openWorldHint:false};
+const CREATE={readOnlyHint:false,destructiveHint:false,idempotentHint:false,openWorldHint:false};
+const ACT={readOnlyHint:false,destructiveHint:false,idempotentHint:true,openWorldHint:false};
+const FINAL={readOnlyHint:false,destructiveHint:true,idempotentHint:true,openWorldHint:false};
+const tool=(name,title,description,properties,required,annotations)=>({name,title,description,inputSchema:{...obj,properties,required},annotations:{title,...annotations}});
 const tools=[
-{name:"list_games",description:"List the available historical financial simulation games.",inputSchema:{...obj,properties:{}}},
-{name:"open_game",description:"Return the URL of the actual playable browser game.",inputSchema:{...obj,properties:{country:{...str,enum:["usa","japan"]}},required:["country"]}},
-{name:"game_guide",description:"Explain how to start a historical financial simulation.",inputSchema:{...obj,properties:{country:{...str,enum:["usa","japan"]}},required:["country"]}},
-{name:"start_game",description:"Start a new playable historical finance game. Call with country and profession from list_professions.",inputSchema:{...obj,properties:{country:{...str,enum:["usa","japan"]},profession:str},required:["country","profession"]}},
-{name:"list_professions",description:"List authentic professions available for a country.",inputSchema:{...obj,properties:{country:{...str,enum:["usa","japan"]}},required:["country"]}},
-{name:"get_status",description:"Read current game status. Does not advance time.",inputSchema:{...obj,properties:{session_id:str},required:["session_id"]}},
-{name:"make_decision",description:"Trade assets in the current quarter. Actions: buy_stock, sell_stock, buy_gold, sell_gold, buy_house, sell_house, refinance, pay_loan. For buys and loan payments amount is money; for sells amount is a fraction 0–1; house actions use house_index.",inputSchema:{...obj,properties:{session_id:str,action:{...str,enum:["buy_stock","sell_stock","buy_gold","sell_gold","buy_house","sell_house","refinance","pay_loan"]},amount:{type:"number"},house_index:{type:"integer",minimum:0},request_id:str},required:["session_id","action","request_id"]}},
-{name:"next_turn",description:"Advance exactly one historical quarter. Provide a unique request_id to avoid duplicate turns.",inputSchema:{...obj,properties:{session_id:str,request_id:str},required:["session_id","request_id"]}},
-{name:"end_game",description:"Finish the current session and get nominal and inflation-adjusted net worth.",inputSchema:{...obj,properties:{session_id:str,request_id:str},required:["session_id","request_id"]}},
-{name:"delete_game",description:"Permanently delete a game session and all its stored data now. Cannot be undone.",inputSchema:{...obj,properties:{session_id:str},required:["session_id"]}}
+tool("list_games","List games","List the available historical financial simulation games.",{},[],READ),
+tool("open_game","Open browser game","Return the URL of the playable browser version of a game.",{country},["country"],READ),
+tool("game_guide","Game guide","Explain how to start and play a historical financial simulation.",{country},["country"],READ),
+tool("list_professions","List professions","List the professions available in a country's game, with pay and risk notes.",{country},["country"],READ),
+tool("start_game","Start game","Start a new game in the chosen country with a profession from list_professions. Returns a session_id.",{country,profession:{...str,description:"Profession id from list_professions."}},["country","profession"],CREATE),
+tool("get_status","Get status","Read the game: quarter, money, holdings, debts, income, net worth and this quarter's prices and bank terms. Changes nothing.",{session_id:sid},["session_id"],READ),
+tool("buy_stock","Buy stocks","Buy stock-index shares with game money at this quarter's price (broker commission applies).",{session_id:sid,request_id:rid,amount:money},["session_id","request_id","amount"],ACT),
+tool("sell_stock","Sell stocks","Sell a share of the stock holding at this quarter's price.",{session_id:sid,request_id:rid,fraction},["session_id","request_id","fraction"],ACT),
+tool("buy_gold","Buy gold","Buy gold with game money at this quarter's price (not allowed in the USA before 1975).",{session_id:sid,request_id:rid,amount:money},["session_id","request_id","amount"],ACT),
+tool("sell_gold","Sell gold","Sell a share of the gold holding at this quarter's price.",{session_id:sid,request_id:rid,fraction},["session_id","request_id","fraction"],ACT),
+tool("buy_house","Buy a home","Buy a home with a mortgage if the bank approves (see get_status.market.house_quote).",{session_id:sid,request_id:rid},["session_id","request_id"],ACT),
+tool("sell_house","Sell a home","Sell an owned home; the mortgage is repaid from the proceeds.",{session_id:sid,request_id:rid,house_index:houseIndex},["session_id","request_id","house_index"],ACT),
+tool("refinance","Refinance mortgage","Refinance an owned home's mortgage when a lower rate is offered (see get_status.market.refinance_offers).",{session_id:sid,request_id:rid,house_index:houseIndex},["session_id","request_id","house_index"],ACT),
+tool("pay_loan","Repay student loan","Repay part of the student loan with game money.",{session_id:sid,request_id:rid,amount:money},["session_id","request_id","amount"],ACT),
+tool("next_turn","Next quarter","Advance exactly one historical quarter: pay, expenses, market moves and life events.",{session_id:sid,request_id:rid},["session_id","request_id"],ACT),
+tool("end_game","End game","Finish the game and report nominal and inflation-adjusted net worth. No further moves are possible.",{session_id:sid,request_id:rid},["session_id","request_id"],FINAL),
+tool("delete_game","Delete game","Permanently delete the game session and all its stored data now. Cannot be undone.",{session_id:sid},["session_id"],FINAL)
 ];
+const ACTIONS=["buy_stock","sell_stock","buy_gold","sell_gold","buy_house","sell_house","refinance","pay_loan"];
 const ok=(id,value)=>({jsonrpc:"2.0",id,result:value});
 const err=(id,code,message)=>({jsonrpc:"2.0",id,error:{code,message}});
 const response=(data,isError=false)=>({content:[{type:"text",text:JSON.stringify(data)}],...(isError?{isError:true}:{})});
@@ -91,9 +111,9 @@ export class GameSession{
    if(op==="status")return Response.json({state:status(country,s),...(saved.finished||s.over||s.won?{outcome:outcome(country,s)}:{})});
    const key=args.request_id;
    if(typeof key!=="string"||key.length<8||key.length>128)return Response.json({error:"request_id must be 8–128 characters"},{status:400});
-   const cached=saved.requests[key];
+   const cached=saved.requests[key],opKey=op==="decision"?args.action:op;
    if(cached){
-    if(cached.op&&cached.op!==op)return Response.json({error:`request_id already used for a different operation (${cached.op})`},{status:409});
+    if(cached.op&&cached.op!==opKey)return Response.json({error:`request_id already used for a different operation (${cached.op})`},{status:409});
     return Response.json({...cached.result,replayed:true});
    }
    let result;
@@ -108,7 +128,7 @@ export class GameSession{
     if(done!==true)return Response.json({error:"Invalid or unavailable action",state:status(country,s)},{status:400});
     result={action,executed:true,state:status(country,s)};
    }else return Response.json({error:"Unknown operation"},{status:400});
-   saved.requests[key]={op,result};
+   saved.requests[key]={op:opKey,result};
    const ids=Object.keys(saved.requests);if(ids.length>100)delete saved.requests[ids[0]];
    await this.state.storage.put("game",saved);
    await this.state.storage.setAlarm(Date.now()+SESSION_TTL_MS);
@@ -132,9 +152,11 @@ async function invoke(env,name,args){
   sessionId=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,"0")).join("");
  }else if(!validSession(sessionId))return response({error:"Invalid session_id"},true);
  const id=env.GAME_SESSIONS.idFromName(sessionId),stub=env.GAME_SESSIONS.get(id);
- const op={start_game:"start",get_status:"status",make_decision:"decision",next_turn:"next",end_game:"end",delete_game:"delete"}[name];
+ const op=ACTIONS.includes(name)?"decision":{start_game:"start",get_status:"status",next_turn:"next",end_game:"end",delete_game:"delete"}[name];
  if(!op)return response({error:"Unknown tool"},true);
- const res=await stub.fetch("https://session.internal/",{method:"POST",body:JSON.stringify({op,args})});
+ // One tool per action; sells take `fraction`, the engine calls it amount.
+ const opArgs=op==="decision"?{request_id:args.request_id,action:name,amount:name==="sell_stock"||name==="sell_gold"?args.fraction:args.amount,house_index:args.house_index}:args;
+ const res=await stub.fetch("https://session.internal/",{method:"POST",body:JSON.stringify({op,args:opArgs})});
  const result=await res.json();
  return response(res.ok?{session_id:sessionId,...result}:result,!res.ok);
 }

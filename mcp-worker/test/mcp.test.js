@@ -40,7 +40,34 @@ test("initialize and tools/list", async () => {
   const init = await rpc("initialize", {protocolVersion: "2025-06-18", capabilities: {}, clientInfo: {name: "t", version: "1"}});
   assert.equal(init.result.serverInfo.name, "someone-elses-shoes");
   const names = (await rpc("tools/list")).result.tools.map(t => t.name);
-  for (const t of ["list_games", "open_game", "game_guide", "list_professions", "start_game", "get_status", "make_decision", "next_turn", "end_game", "delete_game"]) assert.ok(names.includes(t), t);
+  for (const t of ["list_games", "open_game", "game_guide", "list_professions", "start_game", "get_status", "buy_stock", "sell_stock", "buy_gold", "sell_gold", "buy_house", "sell_house", "refinance", "pay_loan", "next_turn", "end_game", "delete_game"]) assert.ok(names.includes(t), t);
+});
+
+test("every tool has explicit boolean annotations; make_decision is gone", async () => {
+  const tools = (await rpc("tools/list")).result.tools;
+  assert.equal(tools.length, 17);
+  assert.ok(!tools.some(t => t.name === "make_decision"));
+  for (const t of tools) {
+    for (const k of ["readOnlyHint", "destructiveHint", "openWorldHint"]) assert.equal(typeof t.annotations?.[k], "boolean", `${t.name}.${k}`);
+    assert.equal(t.annotations.openWorldHint, false, t.name);
+    assert.ok(t.description && t.inputSchema?.type === "object", t.name);
+  }
+  const a = Object.fromEntries(tools.map(t => [t.name, t.annotations]));
+  for (const n of ["list_games", "open_game", "game_guide", "list_professions", "get_status"]) assert.equal(a[n].readOnlyHint, true, n);
+  for (const n of ["end_game", "delete_game"]) assert.equal(a[n].destructiveHint, true, n);
+  for (const n of ["start_game", "buy_stock", "sell_stock", "buy_gold", "sell_gold", "buy_house", "sell_house", "refinance", "pay_loan", "next_turn"]) { assert.equal(a[n].readOnlyHint, false, n); assert.equal(a[n].destructiveHint, false, n); }
+});
+
+test("per-action tools: sell by fraction, request_id bound to the action", async () => {
+  const st = await call("start_game", {country: "usa", profession: "engineer"}), sid = st.data.session_id;
+  const b = await call("buy_stock", {session_id: sid, amount: Math.floor(st.data.state.cash / 2), request_id: "same-key-123"});
+  assert.equal(b.isError, false);
+  const clash = await call("sell_stock", {session_id: sid, fraction: 0.5, request_id: "same-key-123"});
+  assert.equal(clash.isError, true); assert.match(clash.data.error, /different operation \(buy_stock\)/);
+  const s = await call("sell_stock", {session_id: sid, fraction: 0.5, request_id: rid()});
+  assert.equal(s.isError, false); assert.ok(Math.abs(s.data.state.stock_units - b.data.state.stock_units / 2) < 1e-9);
+  assert.equal((await call("sell_stock", {session_id: sid, fraction: 1.5, request_id: rid()})).isError, true);
+  assert.equal((await call("make_decision", {session_id: sid, action: "buy_stock", amount: 1, request_id: rid()})).isError, true);
 });
 
 test("OpenAI apps challenge: 404 without a token, exact token as text/plain with one", async () => {
@@ -86,15 +113,15 @@ for (const [country, E, prof] of [["usa", USA, "teacher"], ["japan", Japan, "sal
     assert.deepEqual(g1.data, g2.data); assert.equal(g1.data.state.turn, 0);
 
     // insufficient funds
-    const tooMuch = await call("make_decision", {session_id: sid, action: "buy_stock", amount: s0.cash + 1, request_id: rid()});
+    const tooMuch = await call("buy_stock", {session_id: sid, amount: s0.cash + 1, request_id: rid()});
     assert.equal(tooMuch.isError, true); assert.match(tooMuch.data.error, /insufficient funds/);
 
     // buy stock, idempotent by request_id
     const amt = Math.floor(s0.cash / 2), key = rid();
-    const b1 = await call("make_decision", {session_id: sid, action: "buy_stock", amount: amt, request_id: key});
+    const b1 = await call("buy_stock", {session_id: sid, amount: amt, request_id: key});
     assert.equal(b1.isError, false, JSON.stringify(b1.data));
     E.buyStock(ref, amt);
-    const b2 = await call("make_decision", {session_id: sid, action: "buy_stock", amount: amt, request_id: key});
+    const b2 = await call("buy_stock", {session_id: sid, amount: amt, request_id: key});
     assert.equal(b2.data.replayed, true);
     assert.equal(b2.data.state.stock_units, b1.data.state.stock_units, "retry did not buy twice");
     assert.equal((await call("get_status", {session_id: sid})).data.state.cash, ref.cash);
@@ -120,7 +147,7 @@ for (const [country, E, prof] of [["usa", USA, "teacher"], ["japan", Japan, "sal
       // keep investing a little each year while possible
       if (ref.t % 4 === 0 && ref.cash > 100 && !ref.over && !ref.won) {
         const a = Math.floor(ref.cash / 4);
-        const d = await call("make_decision", {session_id: sid, action: "buy_stock", amount: a, request_id: rid()});
+        const d = await call("buy_stock", {session_id: sid, amount: a, request_id: rid()});
         assert.equal(d.isError, false, JSON.stringify(d.data)); E.buyStock(ref, a);
       }
       if (ref.over || ref.won) { assert.ok(t.data.outcome, "outcome reported at the end"); }
@@ -131,7 +158,7 @@ for (const [country, E, prof] of [["usa", USA, "teacher"], ["japan", Japan, "sal
     assert.equal(end.isError, false, JSON.stringify(end.data));
     assert.ok(["won", "finished", "bankrupt"].includes(end.data.outcome.result));
     assert.equal(end.data.outcome.net_worth_nominal, E.netWorth(ref));
-    const after = await call("make_decision", {session_id: sid, action: "buy_stock", amount: 1, request_id: rid()});
+    const after = await call("buy_stock", {session_id: sid, amount: 1, request_id: rid()});
     assert.equal(after.isError, true);
   });
 }
@@ -145,5 +172,5 @@ test("errors: bad session, bad profession, ended early game", async () => {
   const e = await call("end_game", {session_id: sid, request_id: rid()});
   assert.equal(e.data.outcome.turns_played, 0);
   assert.equal((await call("next_turn", {session_id: sid, request_id: rid()})).isError, true);
-  assert.equal((await call("make_decision", {session_id: sid, action: "buy_stock", amount: 10})).isError, true, "request_id required");
+  assert.equal((await call("buy_stock", {session_id: sid, amount: 10})).isError, true, "request_id required");
 });

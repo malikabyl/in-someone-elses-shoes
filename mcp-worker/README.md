@@ -9,7 +9,10 @@ Live endpoint: https://someone-elses-shoes-mcp.someone-elses-shoes-mcp.workers.d
 - `list_professions(country)` — the 10 professions of each game (Japan names and texts come from `japan/index.html`, see `src/japan-text.js`).
 - `start_game(country, profession)` — new session; start quarter chosen as in the browser (`start = seed % (MAX_START+1)`).
 - `get_status(session_id)` — read-only state, including the quarter's market prices, mortgage quote and refinance offers.
-- `make_decision(session_id, action, amount?, house_index?, request_id)` — `buy_stock`, `sell_stock`, `buy_gold`, `sell_gold`, `buy_house`, `sell_house`, `refinance`, `pay_loan`. Buys take money, sells a fraction 0–1. Refusals name the reason.
+- One tool per action, each with `session_id` and `request_id`: `buy_stock(amount)`, `buy_gold(amount)`, `pay_loan(amount)` take game money; `sell_stock(fraction)`, `sell_gold(fraction)` take a share 0–1; `buy_house()`; `sell_house(house_index)`, `refinance(house_index)`. Refusals name the reason.
+- `delete_game(session_id)` — erase the session immediately.
+
+Every tool carries explicit `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint` annotations (`openWorldHint` is false everywhere: the service only touches its own storage).
 - `next_turn(session_id, request_id)` — exactly one quarter of the original engine; quarter notes include text.
 - `end_game(session_id, request_id)` — final nominal and real outcome; works after the natural end too.
 
