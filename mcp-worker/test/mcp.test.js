@@ -43,6 +43,15 @@ test("initialize and tools/list", async () => {
   for (const t of ["list_games", "open_game", "game_guide", "list_professions", "start_game", "get_status", "make_decision", "next_turn", "end_game", "delete_game"]) assert.ok(names.includes(t), t);
 });
 
+test("OpenAI apps challenge: 404 without a token, exact token as text/plain with one", async () => {
+  const url = "https://x/.well-known/openai-apps-challenge";
+  assert.equal((await worker.fetch(new Request(url), env)).status, 404);
+  const r = await worker.fetch(new Request(url), {...env, OPENAI_APPS_CHALLENGE: " tok_ABC123\n"});
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get("content-type"), "text/plain");
+  assert.equal(await r.text(), "tok_ABC123");
+});
+
 test("delete_game removes the session", async () => {
   const sid = (await call("start_game", {country: "japan", profession: "nurse"})).data.session_id;
   await call("next_turn", {session_id: sid, request_id: rid()});

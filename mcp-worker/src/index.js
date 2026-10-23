@@ -152,6 +152,8 @@ export default {async fetch(request,env){
  if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
  const path=new URL(request.url).pathname;
  if(path==="/health")return Response.json({ok:true,service:"someone-elses-shoes-mcp"},{headers});
+ // OpenAI Apps domain verification: the token from the developer portal lives in the OPENAI_APPS_CHALLENGE variable.
+ if(path==="/.well-known/openai-apps-challenge"){const t=(env?.OPENAI_APPS_CHALLENGE||"").trim();return t?new Response(t,{headers:{"content-type":"text/plain","cache-control":"no-store"}}):new Response("Not found",{status:404,headers});}
  if(path!=="/mcp")return new Response("Not found",{status:404,headers});
  if(request.method==="GET")return new Response("Use POST JSON-RPC",{status:405,headers});
  if(request.method!=="POST")return new Response("Method not allowed",{status:405,headers});
